@@ -1,6 +1,7 @@
 package processor
 
 import (
+	// "encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	"github.com/hairlesshobo/go-import-media/model"
+	"github.com/hairlesshobo/go-import-media/processor/canonEOS"
+	"github.com/hairlesshobo/go-import-media/processor/canonXA"
 	"github.com/hairlesshobo/go-import-media/util"
 )
 
@@ -20,7 +23,7 @@ type Processor interface {
 }
 
 func initProcessors(volumePath string) []Processor {
-	processors := []Processor{&CanonXA{}}
+	processors := []Processor{&canonXA.Processor{}, &canonEOS.Processor{}}
 
 	for _, processor := range processors {
 		processor.SetSourceDir(volumePath)
@@ -43,7 +46,7 @@ func FindProcessors(volumePath string) []Processor {
 	}
 
 	if len(foundProcessors) == 0 {
-		// TODO: eject and flash yellow if not processor found
+		// TODO: eject and flash yellow if no processor found
 		slog.Warn(fmt.Sprintf("processor.FindProcessors: No processor found for volume path '%s', skipping", volumePath))
 		return nil
 	}
@@ -65,6 +68,8 @@ func ProcessSource(processor Processor) bool {
 	files := processor.EnumerateFiles()
 	// j, _ := json.MarshalIndent(files, "", "  ")
 	// fmt.Println(string(j))
+
+	// return true
 
 	for _, sourceFile := range files {
 		destDir := util.GetDestinationDirectory(model.Config.LiveDataDir, sourceFile)
