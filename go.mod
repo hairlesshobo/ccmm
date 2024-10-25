@@ -3,6 +3,7 @@ module github.com/hairlesshobo/go-import-media
 go 1.22.5
 
 require (
+	github.com/go-chi/chi/v5 v5.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd // indirect
