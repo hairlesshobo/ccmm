@@ -8,15 +8,17 @@ import (
 	"regexp"
 )
 
-func requireFileOrDir(rootDir string, items []string, needsDir bool) bool {
+func requireMultipleFileOrDir(rootDir string, items []string, needsDir bool) bool {
+	itemType := "file"
+	if needsDir {
+		itemType = "directory"
+	}
+
 	for _, checkPath := range items {
+		slog.Debug(fmt.Sprintf("util.requireMultipleFileOrDir: Testing for %s '%s' in path '%s'", itemType, checkPath, rootDir))
 		fullPath := path.Join(rootDir, checkPath)
 
 		if stat, err := os.Stat(fullPath); err != nil || (needsDir && !stat.IsDir()) || (!needsDir && stat.IsDir()) {
-			itemType := "file"
-			if needsDir {
-				itemType = "directory"
-			}
 			fmt.Printf("required %s missing: %s\n", itemType, checkPath)
 			return false
 		}
@@ -26,14 +28,20 @@ func requireFileOrDir(rootDir string, items []string, needsDir bool) bool {
 }
 
 func requireRegexFileOrDirMatch(rootDir string, namePattern string, needsDir bool) (bool, string) {
+	itemType := "file"
+	if needsDir {
+		itemType = "directory"
+	}
+
 	entries, err := os.ReadDir(rootDir)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error occurred when reading directory '%s': %s", rootDir, err))
+		slog.Error(fmt.Sprintf("util.requireRegexFileOrDirMatch: Error occurred when reading directory '%s': %s", rootDir, err))
 		return false, ""
 	}
 
 	for _, entry := range entries {
+		slog.Debug(fmt.Sprintf("util.requireRegexFileOrDirMatch: Testing for %s with pattern '%s' in path '%s'", itemType, namePattern, rootDir))
 		match, _ := regexp.MatchString(namePattern, entry.Name())
 
 		if match && ((needsDir && entry.IsDir()) || (!needsDir && !entry.IsDir())) {
@@ -45,11 +53,11 @@ func requireRegexFileOrDirMatch(rootDir string, namePattern string, needsDir boo
 }
 
 func RequireDirs(rootDir string, dirs []string) bool {
-	return requireFileOrDir(rootDir, dirs, true)
+	return requireMultipleFileOrDir(rootDir, dirs, true)
 }
 
 func RequireFiles(rootDir string, files []string) bool {
-	return requireFileOrDir(rootDir, files, false)
+	return requireMultipleFileOrDir(rootDir, files, false)
 }
 
 func RequireRegexDirMatch(rootDir string, namePattern string) (bool, string) {

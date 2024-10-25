@@ -38,27 +38,36 @@ func GetDestinationDirectory(destRootDir string, sourceFile model.SourceFile) st
 	return path.Join(destRootDir, GetDestinationDirectoryRelative(sourceFile))
 }
 
-func CopyFile(src, dst string) (int64, error) {
-	sourceFileStat, err := os.Stat(src)
+func CopyFile(sourcePath string, destPath string) (int64, error) {
+	sourceFileStat, err := os.Stat(sourcePath)
 	if err != nil {
 		return 0, err
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
+		return 0, fmt.Errorf("%s is not a regular file", sourcePath)
 	}
 
-	source, err := os.Open(src)
+	source, err := os.Open(sourcePath)
 	if err != nil {
 		return 0, err
 	}
 	defer source.Close()
 
-	destination, err := os.Create(dst)
+	destination, err := os.Create(destPath)
 	if err != nil {
 		return 0, err
 	}
 	defer destination.Close()
+
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
+}
+
+func FileExists(filePath string) bool {
+	if stat, err := os.Stat(filePath); err == nil && stat.Mode().IsRegular() {
+		return true
+	}
+
+	return false
 }

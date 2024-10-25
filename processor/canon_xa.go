@@ -34,32 +34,39 @@ func (t *CanonXA) SetSourceDir(sourceDir string) {
 }
 
 func (t *CanonXA) CheckSource() bool {
+	slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Beginning to test volume compatibility for '%s'", t.sourceDir))
+
 	// verify volume label matches what the camera sets
+	slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Testing volume name at '%s'", t.sourceDir))
 	_, label := path.Split(t.sourceDir)
 	if label != expectedVolumeName {
-		slog.Debug(fmt.Sprintf("CanonXA70: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
+		slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}
 
 	// check for /CONTENTS and /DCIM directories
+	slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Testing for required directories for volume '%s'", t.sourceDir))
 	if !util.RequireDirs(t.sourceDir, []string{"CONTENTS", "DCIM"}) {
-		slog.Debug("CanonXA: One or more required directories does not exist on source, disqualified")
+		slog.Debug("CanonXA.CheckSource: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
 	// check for CONTENTS/CLIPS(\d+)
+	slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Testing for existence of CONTENTS/CLIPSxxx directory in volume '%s'", t.sourceDir))
 	exists, clipsPath := util.RequireRegexDirMatch(path.Join(t.sourceDir, "CONTENTS"), `CLIPS(\d+)`)
 	if !exists {
-		slog.Debug("CanonXA: No '/CONTENTS/CLIPSXXX/' directory found, disqualified")
+		slog.Debug("CanonXA.CheckSource: No '/CONTENTS/CLIPSXXX/' directory found, disqualified")
 		return false
 	}
 
 	// check for CONTENTS/CLIPS(\d+)/INDEX.MIF file
+	slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Testing for existence of CONTENTS/CLIPSxxx/INDEX.MIF in volume '%s'", t.sourceDir))
 	if !util.RequireFiles(clipsPath, []string{"INDEX.MIF"}) {
-		slog.Debug("CanonXA: INDEX.MIF file not found in CLIPS directory, disqualified")
+		slog.Debug("CanonXA.CheckSource: INDEX.MIF file not found in CLIPS directory, disqualified")
 		return false
 	}
 
+	slog.Debug(fmt.Sprintf("CanonXA.CheckSource: Volume '%s' is compatible", t.sourceDir))
 	return true
 }
 
@@ -77,9 +84,11 @@ func getSourceName(mediaPath string) string {
 
 	x := xmlResult{"Unknown"}
 
+	slog.Debug(fmt.Sprintf("CanonXA.getSourceName: Reading SourceName from file '%s'", sidecarFile))
+
 	xmlFile, err := os.Open(sidecarFile)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to open sidecar file '%s': %s", sidecarFile, err.Error()))
+		slog.Error(fmt.Sprintf("CanonXA.getSourceName: Failed to open sidecar file '%s': %s", sidecarFile, err.Error()))
 	} else {
 		defer xmlFile.Close()
 
@@ -99,13 +108,15 @@ func getCaptureDate(fileName string) time.Time {
 	dtm, err := time.Parse("060102 MST", fmt.Sprintf("%s %s", datePart, zone))
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to parse date '%s': %s", datePart, err.Error()))
+		slog.Error(fmt.Sprintf("CanonXA.getCaptureDate: Failed to parse date '%s': %s", datePart, err.Error()))
 	}
 
 	return dtm
 }
 
 func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
+	slog.Debug(fmt.Sprintf("CanonXA.scanDirectory: Scanning for source files at path '%s'", absoluteDirPath))
+
 	var files []model.SourceFile
 
 	// For this processor, we only care about .MXF files and the sidecar XML files
@@ -113,7 +124,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 	entries, err := os.ReadDir(absoluteDirPath)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
+		slog.Error(fmt.Sprintf("CanonXA.scanDirectory: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
 		return nil
 	}
 
@@ -134,13 +145,15 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 			}
 
 			if foundMatch {
+				slog.Debug(fmt.Sprintf("CanonXA.scanDirectory: Matched file '%s'", fullPath))
+
 				stat, _ := os.Stat(fullPath)
 
 				var newFile model.SourceFile
 				newFile.FileName = entry.Name()
 				newFile.SourcePath = fullPath
 				newFile.MediaType = mediaType
-				newFile.Size = uint64(stat.Size())
+				newFile.Size = stat.Size()
 				newFile.SourceName = getSourceName(fullPath)
 				newFile.CaptureDate = getCaptureDate(entry.Name())
 				newFile.FileModTime = stat.ModTime()
