@@ -67,9 +67,7 @@ func (t *CanonXA) EnumerateFiles() []model.SourceFile {
 	return scanDirectory(path.Join(t.sourceDir, "CONTENTS"), "CONTENTS")
 }
 
-func (t *CanonXA) ProcessSource() {
-
-}
+// private functions
 
 func getSourceName(mediaPath string) string {
 	sidecarFile := mediaPath
@@ -96,7 +94,6 @@ func getSourceName(mediaPath string) string {
 }
 
 func getCaptureDate(fileName string) time.Time {
-	// A095C001_241020HP_CANON
 	datePart := strings.Split(fileName, "_")[1][:6]
 	zone, _ := time.Now().Zone()
 	dtm, err := time.Parse("060102 MST", fmt.Sprintf("%s %s", datePart, zone))
@@ -146,6 +143,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 				newFile.Size = uint64(stat.Size())
 				newFile.SourceName = getSourceName(fullPath)
 				newFile.CaptureDate = getCaptureDate(entry.Name())
+				newFile.FileModTime = stat.ModTime()
 
 				files = append(files, newFile)
 			}

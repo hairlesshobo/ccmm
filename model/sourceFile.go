@@ -9,4 +9,5 @@ type SourceFile struct {
 	MediaType   string
 	SourceName  string
 	CaptureDate time.Time
+	FileModTime time.Time
 }
