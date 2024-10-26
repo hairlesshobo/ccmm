@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 
@@ -13,8 +12,6 @@ import (
 func LoadConfig() {
 	readFile(&model.Config)
 	readEnv(&model.Config)
-
-	fmt.Printf("%+v\n", model.Config)
 }
 
 func processError(err error) {

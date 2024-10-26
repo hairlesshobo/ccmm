@@ -54,17 +54,17 @@ func FindProcessors(volumePath string) []Processor {
 	return foundProcessors
 }
 
-func ProcessSources(processors []Processor) bool {
+func ProcessSources(processors []Processor, dryRun bool) bool {
 	success := true
 	for _, processor := range processors {
-		success = success && ProcessSource(processor)
+		success = success && ProcessSource(processor, dryRun)
 	}
 
 	// TODO: is this necessary?
 	return success
 }
 
-func ProcessSource(processor Processor) bool {
+func ProcessSource(processor Processor, dryRun bool) bool {
 	files := processor.EnumerateFiles()
 	// j, _ := json.MarshalIndent(files, "", "  ")
 	// fmt.Println(string(j))
@@ -76,7 +76,9 @@ func ProcessSource(processor Processor) bool {
 		destPath := path.Join(destDir, sourceFile.FileName)
 
 		// Create the dir and parents, if needed
-		os.MkdirAll(destDir, 0755)
+		if !dryRun {
+			os.MkdirAll(destDir, 0755)
+		}
 
 		stat, err := os.Stat(destPath)
 		fileExists := err == nil && stat.Mode().IsRegular()
@@ -94,8 +96,12 @@ func ProcessSource(processor Processor) bool {
 			slog.Debug(fmt.Sprintf("File already exists but is different size, will copy to '%s'", destPath))
 		}
 
-		slog.Info(fmt.Sprintf("Copying '%s' to '%s'", sourceFile.SourcePath, destPath))
-		util.CopyFile(sourceFile.SourcePath, destPath)
+		if dryRun {
+			slog.Info(fmt.Sprintf("[Dry run] Would copy '%s' to '%s'", sourceFile.SourcePath, destPath))
+		} else {
+			slog.Info(fmt.Sprintf("Copying '%s' to '%s'", sourceFile.SourcePath, destPath))
+			util.CopyFile(sourceFile.SourcePath, destPath)
+		}
 
 		os.Chtimes(destPath, time.Time{}, sourceFile.FileModTime)
 	}
