@@ -3,18 +3,18 @@ package action
 import (
 	"fmt"
 	"log/slog"
-	"os"
 
 	"github.com/hairlesshobo/go-import-media/model"
 	"github.com/hairlesshobo/go-import-media/processor"
+	"github.com/hairlesshobo/go-import-media/util"
 )
 
-func Import(params model.ImportVolume) {
+func Import(params model.ImportVolume) bool {
 	slog.Info(fmt.Sprintf("Beginning import for volume '%s'", params.VolumePath))
 
-	if stat, err := os.Stat(params.VolumePath); err != nil || !stat.IsDir() {
+	if !util.DirectoryExists(params.VolumePath) {
 		slog.Error(fmt.Sprintf("Directory not found: %s", params.VolumePath))
-		os.Exit(1)
+		return false
 	}
 
 	processors := processor.FindProcessors(params.VolumePath)
@@ -25,4 +25,6 @@ func Import(params model.ImportVolume) {
 	// do eject, if enabled
 
 	slog.Info(fmt.Sprintf("Finished import for volume '%s'", params.VolumePath))
+
+	return true
 }

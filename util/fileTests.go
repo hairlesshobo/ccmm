@@ -67,3 +67,11 @@ func RequireRegexDirMatch(rootDir string, namePattern string) (bool, string) {
 func RequireRegexFileMatch(rootDir string, namePattern string) (bool, string) {
 	return requireRegexFileOrDirMatch(rootDir, namePattern, false)
 }
+
+func DirectoryExists(testDir string) bool {
+	if stat, err := os.Stat(testDir); err != nil || !stat.IsDir() {
+		return false
+	}
+
+	return true
+}

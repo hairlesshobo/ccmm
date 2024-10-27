@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/hairlesshobo/go-import-media/model"
+	"github.com/hairlesshobo/go-import-media/util"
 )
 
 func StartServer(listenPort int32) {
@@ -26,7 +27,7 @@ func StartServer(listenPort int32) {
 
 	r := chi.NewRouter()
 
-	go startImporter(importQueueChan, shutdownChan)
+	go importer(importQueueChan, shutdownChan)
 
 	r.Use(middleware.Logger)
 
@@ -44,9 +45,13 @@ func StartServer(listenPort int32) {
 
 		fmt.Printf("%+v\n", importConfig)
 
-		importQueueChan <- importConfig
-
-		w.WriteHeader(201)
+		if !util.DirectoryExists(importConfig.VolumePath) {
+			w.WriteHeader(500)
+			// TODO: write an error response (define a model?)
+		} else {
+			importQueueChan <- importConfig
+			w.WriteHeader(201)
+		}
 
 	})
 
