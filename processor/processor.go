@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hairlesshobo/go-import-media/model"
+	"github.com/hairlesshobo/go-import-media/processor/behringerX32"
 	"github.com/hairlesshobo/go-import-media/processor/canonEOS"
 	"github.com/hairlesshobo/go-import-media/processor/canonXA"
 	"github.com/hairlesshobo/go-import-media/util"
@@ -23,7 +24,11 @@ type Processor interface {
 }
 
 func initProcessors(volumePath string) []Processor {
-	processors := []Processor{&canonXA.Processor{}, &canonEOS.Processor{}}
+	processors := []Processor{
+		&canonXA.Processor{},
+		&canonEOS.Processor{},
+		&behringerX32.Processor{},
+	}
 
 	for _, processor := range processors {
 		processor.SetSourceDir(volumePath)
