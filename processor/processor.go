@@ -2,6 +2,7 @@ package processor
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/hairlesshobo/go-import-media/processor/behringerX32"
 	"github.com/hairlesshobo/go-import-media/processor/canonEOS"
 	"github.com/hairlesshobo/go-import-media/processor/canonXA"
+	"github.com/hairlesshobo/go-import-media/processor/jackRecorder"
 	"github.com/hairlesshobo/go-import-media/util"
 )
 
@@ -28,6 +30,7 @@ func initProcessors(volumePath string) []Processor {
 		&canonXA.Processor{},
 		&canonEOS.Processor{},
 		&behringerX32.Processor{},
+		&jackRecorder.Processor{},
 	}
 
 	for _, processor := range processors {
@@ -44,8 +47,6 @@ func FindProcessors(volumePath string) []Processor {
 
 	for _, processor := range processors {
 		if processor.CheckSource() {
-			processorName := strings.Split(reflect.TypeOf(processor).String(), ".")[1]
-			slog.Info(fmt.Sprintf("processor.FindProcessors: Found processor '%s' to handle path '%s'", processorName, volumePath))
 			foundProcessors = append(foundProcessors, processor)
 		}
 	}
@@ -54,6 +55,11 @@ func FindProcessors(volumePath string) []Processor {
 		// TODO: eject and flash yellow if no processor found
 		slog.Warn(fmt.Sprintf("processor.FindProcessors: No processor found for volume path '%s', skipping", volumePath))
 		return nil
+	}
+
+	for _, processor := range foundProcessors {
+		processorName := strings.Split(reflect.TypeOf(processor).String(), ".")[0][1:]
+		slog.Info(fmt.Sprintf("processor.FindProcessors: Found processor '%s' to handle path '%s'", processorName, volumePath))
 	}
 
 	return foundProcessors
@@ -71,10 +77,11 @@ func ProcessSources(processors []Processor, dryRun bool) bool {
 
 func ProcessSource(processor Processor, dryRun bool) bool {
 	files := processor.EnumerateFiles()
-	// j, _ := json.MarshalIndent(files, "", "  ")
-	// fmt.Println(string(j))
 
-	// return true
+	j, _ := json.MarshalIndent(files, "", "  ")
+	fmt.Println(string(j))
+
+	return true
 
 	for _, sourceFile := range files {
 		destDir := util.GetDestinationDirectory(model.Config.LiveDataDir, sourceFile)
