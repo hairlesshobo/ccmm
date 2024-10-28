@@ -40,8 +40,7 @@ func (t *Processor) CheckSource() bool {
 
 	// verify volume label matches what the camera sets
 	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Testing volume name at '%s'", t.sourceDir))
-	_, label := path.Split(t.sourceDir)
-	if label != expectedVolumeName {
+	if label := util.GetVolumeName(t.sourceDir); label != expectedVolumeName {
 		slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}
@@ -77,6 +76,7 @@ func (t *Processor) EnumerateFiles() []model.SourceFile {
 
 // private functions
 func (t *Processor) getCameraModel(imagePath string) string {
+	// TODO: Read warning below
 	//!! This type of camera model caching could be an issue if we swapped
 	//!! cards mid-event without first formatting. practically speaking, it
 	//!! shouldn't be a problem since that's not something we've ever done

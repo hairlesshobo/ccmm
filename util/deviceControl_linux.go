@@ -2,8 +2,11 @@
 
 package util
 
-import "log/slog"
-
 func TestPlatform() {
-	slog.Info("This is linux")
+	platformNotSupported(TestPlatform)
+}
+
+func GetVolumeName(mountPath string) string {
+	platformNotSupported(GetVolumeName)
+	return ""
 }

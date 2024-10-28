@@ -34,8 +34,7 @@ func (t *Processor) CheckSource() bool {
 
 	// verify volume label matches what is expected
 	slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Testing volume name at '%s'", t.sourceDir))
-	_, label := path.Split(t.sourceDir)
-	if !strings.HasPrefix(label, expectedVolumeName) {
+	if label := util.GetVolumeName(t.sourceDir); !strings.HasPrefix(label, expectedVolumeName) {
 		slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Volume label '%s' does not start with required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}

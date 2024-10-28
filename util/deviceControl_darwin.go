@@ -2,8 +2,15 @@
 
 package util
 
-import "log/slog"
+import (
+	"path"
+)
 
 func TestPlatform() {
-	slog.Info("This is darwin")
+	platformNotSupported(TestPlatform)
+}
+
+func GetVolumeName(mountPath string) string {
+	_, label := path.Split(mountPath)
+	return label
 }

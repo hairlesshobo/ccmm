@@ -38,8 +38,7 @@ func (t *Processor) CheckSource() bool {
 
 	// verify volume label matches what the camera sets
 	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Testing volume name at '%s'", t.sourceDir))
-	_, label := path.Split(t.sourceDir)
-	if label != expectedVolumeName {
+	if label := util.GetVolumeName(t.sourceDir); label != expectedVolumeName {
 		slog.Debug(fmt.Sprintf("canonXA.CheckSource: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}
