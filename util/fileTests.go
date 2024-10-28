@@ -19,7 +19,7 @@ func requireMultipleFileOrDir(rootDir string, items []string, needsDir bool) boo
 		fullPath := path.Join(rootDir, checkPath)
 
 		if stat, err := os.Stat(fullPath); err != nil || (needsDir && !stat.IsDir()) || (!needsDir && stat.IsDir()) {
-			fmt.Printf("required %s missing: %s\n", itemType, checkPath)
+			slog.Debug(fmt.Sprintf("util.requireMultipleFileOrDir: required %s missing: %s\n", itemType, checkPath))
 			return false
 		}
 	}

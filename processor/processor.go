@@ -2,7 +2,6 @@ package processor
 
 import (
 	// "encoding/json"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -78,10 +77,10 @@ func ProcessSources(processors []Processor, dryRun bool) bool {
 func ProcessSource(processor Processor, dryRun bool) bool {
 	files := processor.EnumerateFiles()
 
-	j, _ := json.MarshalIndent(files, "", "  ")
-	fmt.Println(string(j))
+	//j, _ := json.MarshalIndent(files, "", "  ")
+	//fmt.Println(string(j))
 
-	return true
+	//return true
 
 	for _, sourceFile := range files {
 		destDir := util.GetDestinationDirectory(model.Config.LiveDataDir, sourceFile)
