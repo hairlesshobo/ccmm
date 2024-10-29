@@ -11,6 +11,13 @@ The goal of this project is to automatically import and organize media when it i
 inserted into the machine. Since there are different types and sources of media,
 this project needs to be able to identify the type of media and organize accordingly.
 
+## Dependencies
+
+Linux:
+- findmnt
+- mount with passwordless sudo access
+- udisks2
+
 ## Installation
 
 coming soon...

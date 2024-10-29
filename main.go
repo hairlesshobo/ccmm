@@ -19,7 +19,9 @@
 // ==========================================================================
 package main
 
-import "github.com/hairlesshobo/go-import-media/cmd"
+import (
+	"github.com/hairlesshobo/go-import-media/cmd"
+)
 
 func main() {
 	cmd.Execute()

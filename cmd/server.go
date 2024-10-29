@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"github.com/hairlesshobo/go-import-media/model"
 	"github.com/hairlesshobo/go-import-media/server"
 	"github.com/spf13/cobra"
 )
 
 var (
-	port int32
+	server_listenAddress string
+	server_listenPort    int32
 
 	serverCmd = &cobra.Command{
 		Use:   "server",
@@ -16,13 +18,14 @@ var (
     udev or other integrations to notify the server when media has been inserted.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			server.StartServer(port)
+			server.StartServer(server_listenAddress, server_listenPort)
 		},
 	}
 )
 
 func init() {
-	serverCmd.Flags().Int32VarP(&port, "port", "p", 7273, "Port to start the HTTP REST server on")
+	serverCmd.Flags().StringVarP(&server_listenAddress, "listen", "l", model.Config.ListenAddress, "Local IP address to listen on")
+	serverCmd.Flags().Int32VarP(&server_listenPort, "port", "p", model.Config.ListenPort, "Port to start the HTTP REST server on")
 
 	rootCmd.AddCommand(serverCmd)
 }

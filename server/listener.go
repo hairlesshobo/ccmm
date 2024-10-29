@@ -1,64 +1,60 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/httplog/v2"
 	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/util"
 )
 
-func StartServer(listenPort int32) {
-	shutdownChan := make(chan struct{})
-	defer close(shutdownChan)
+//
+// public functoins
+//
 
-	importQueueChan := make(chan model.ImportVolume)
-	defer close(importQueueChan)
+func StartServer(listenAddress string, listenPort int32) {
+	initImporterThread()
+	startServer(listenAddress, listenPort, setupRouting())
+	cleanupImporterThread()
+}
 
-	listen := fmt.Sprintf(":%d", listenPort)
-	fmt.Println("starting server on " + listen)
+//
+// private functions
+//
 
-	r := chi.NewRouter()
-
-	go importer(importQueueChan, shutdownChan)
-
-	r.Use(middleware.Logger)
-
-	r.Post("/trigger_import", func(w http.ResponseWriter, r *http.Request) {
-		var importConfig model.ImportVolume
-
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			slog.Error("Failed to read request body: " + err.Error())
-		}
-
-		if err = json.Unmarshal(body, &importConfig); err != nil {
-			slog.Error("Failed to unmarshal JSON: " + err.Error())
-		}
-
-		fmt.Printf("%+v\n", importConfig)
-
-		if !util.DirectoryExists(importConfig.VolumePath) {
-			w.WriteHeader(500)
-			// TODO: write an error response (define a model?)
-		} else {
-			importQueueChan <- importConfig
-			w.WriteHeader(201)
-		}
-
-	})
-
-	err := http.ListenAndServe(listen, r)
+func startServer(listenAddress string, listenPort int32, router *chi.Mux) {
+	listen := fmt.Sprintf("%s:%d", listenAddress, listenPort)
+	slog.Info("starting server on " + listen)
+	err := http.ListenAndServe(listen, router)
 
 	if err != nil {
 		slog.Error("http server error", "error", err)
 		os.Exit(1)
 	}
+}
+
+func getLogger() *httplog.Logger {
+	logger := httplog.NewLogger("server.listener", httplog.Options{
+		LogLevel:       slog.Level(model.Config.LogLevel),
+		Concise:        true,
+		RequestHeaders: false,
+	})
+
+	logger.Logger = slog.Default().With(slog.String("component", "router"))
+
+	return logger
+}
+
+func setupRouting() *chi.Mux {
+	router := chi.NewRouter()
+
+	router.Use(httplog.RequestLogger(getLogger()))
+
+	router.Get("/health", healthCheck)
+	router.Post("/trigger_import", triggerImport)
+
+	return router
 }

@@ -1,7 +1,10 @@
-live_data_dir: /Users/flip/test
+live_data_dir: /home/flip/test
 # Log levels:
 #  -4 DEBUG
 #  0 INFO
 #  4 WARN
 #  8 ERROR
 log_level: -4
+use_sudo: true
+listen_address: 127.0.0.1
+listen_port: 7273
