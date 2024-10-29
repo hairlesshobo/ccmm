@@ -1,6 +1,9 @@
 package util
 
 import (
+	"fmt"
+	"log/slog"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -39,4 +42,23 @@ func prepareCommand(command string, arg ...string) (string, []string) {
 	}
 
 	return commandName, commandArgs
+}
+
+func callExternalCommand(command string, arg ...string) (string, int, error) {
+	cmdName, cmdArgs := prepareCommand(command, arg...)
+	slog.Debug("Calling external command", slog.String("command", cmdName), slog.Any("args", cmdArgs))
+
+	cmd := exec.Command(cmdName, cmdArgs...)
+	output, err := cmd.Output()
+	if err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			slog.Debug(fmt.Sprintf("Exit Status: %d", exiterr.ExitCode()))
+			return "", exiterr.ExitCode(), err
+		} else {
+			slog.Warn(fmt.Sprintf("Error occurred while calling '%s' command: %s", cmdName, err.Error()))
+			return "", -666, err
+		}
+	}
+
+	return string(output), 0, nil
 }

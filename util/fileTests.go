@@ -8,6 +8,15 @@ import (
 	"regexp"
 )
 
+func FileExists(path string) bool {
+	// if an error occurred or its a directory, we throw up
+	if stat, err := os.Stat(path); err != nil || stat.IsDir() {
+		return false
+	}
+
+	return true
+}
+
 func requireMultipleFileOrDir(rootDir string, items []string, needsDir bool) bool {
 	itemType := "file"
 	if needsDir {
@@ -19,7 +28,7 @@ func requireMultipleFileOrDir(rootDir string, items []string, needsDir bool) boo
 		fullPath := path.Join(rootDir, checkPath)
 
 		if stat, err := os.Stat(fullPath); err != nil || (needsDir && !stat.IsDir()) || (!needsDir && stat.IsDir()) {
-			slog.Debug(fmt.Sprintf("util.requireMultipleFileOrDir: required %s missing: %s\n", itemType, checkPath))
+			slog.Debug(fmt.Sprintf("util.requireMultipleFileOrDir: required %s missing: %s", itemType, checkPath))
 			return false
 		}
 	}

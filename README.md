@@ -14,9 +14,9 @@ this project needs to be able to identify the type of media and organize accordi
 ## Dependencies
 
 Linux:
+- blkid
 - findmnt
-- mount with passwordless sudo access
-- udisks2
+- udisks2 (for mounting, unmounting, and disk poweroff without sudo access)
 
 ## Installation
 

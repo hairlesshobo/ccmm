@@ -63,11 +63,3 @@ func CopyFile(sourcePath string, destPath string) (int64, error) {
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
 }
-
-func FileExists(filePath string) bool {
-	if stat, err := os.Stat(filePath); err == nil && stat.Mode().IsRegular() {
-		return true
-	}
-
-	return false
-}
