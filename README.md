@@ -1,6 +1,11 @@
-# go-import-media
+# gim
 
 ## Introduction
+
+go-import-media, aka gim, is a tool for automatically importing media
+from removable disks into a predefined folder structure automatically.
+
+## Why?
 
 We generate ~100GB of media data each week at church and currently, I am inserting one
 SD card or flash drive at a time and copying to my laptop, then syncing up to the 
@@ -17,6 +22,9 @@ Linux:
 - blkid
 - findmnt
 - udisks2 (for mounting, unmounting, and disk poweroff without sudo access)
+- udev
+- systemd
+- polkit
 
 ## Installation
 
@@ -28,7 +36,7 @@ coming soon...
 
 ## License
 
-go-import-media is licensed under the Apache-2.0 license
+gim is licensed under the Apache-2.0 license
 
 Copyright (c) 2024 Steve Cross <flip@foxhollow.cc>
 
@@ -47,4 +55,5 @@ Copyright (c) 2024 Steve Cross <flip@foxhollow.cc>
 
 ## Links
 
-[Project on GitHub](https://github.com/hairlesshobo/go-import-media)
+[Project on GitHub](https://github.com/hairlesshobo/gim/)
+[Project Homepage](https://www.foxhollow.cc/projects/gim/)
