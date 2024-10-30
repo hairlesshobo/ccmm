@@ -24,7 +24,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"gim/localsend/discovery/shared"
 	"gim/localsend/model"
 	"io"
 	"net"
@@ -116,11 +115,11 @@ func pingScan() ([]string, error) {
 	return ips, nil
 }
 
-// StartHTTPBroadcast Send HTTP requests to all IPs in the LAN
-func StartHTTPBroadcast() {
+// StartBroadcastHTTP Send HTTP requests to all IPs in the LAN
+func StartBroadcastHTTP(config model.ConfigModel, message model.BroadcastMessage) {
 
 	for {
-		data, err := json.Marshal(shared.Messsage)
+		data, err := json.Marshal(message)
 		// fmt.Println(string(data))
 		if err != nil {
 			panic(err)
@@ -138,7 +137,7 @@ func StartHTTPBroadcast() {
 			go func(ip string) {
 				defer wg.Done()
 				ctx := context.Background()
-				registerWithHttp(ctx, ip, data)
+				registerWithHttp(config, ctx, ip, data)
 			}(ip)
 		}
 
@@ -150,8 +149,8 @@ func StartHTTPBroadcast() {
 }
 
 // registerWithHttp Sending HTTP Requests
-func registerWithHttp(ctx context.Context, ip string, data []byte) {
-	url := fmt.Sprintf("https://%s:%d/api/localsend/v2/register", ip, shared.Messsage.Port)
+func registerWithHttp(config model.ConfigModel, ctx context.Context, ip string, data []byte) {
+	url := fmt.Sprintf("https://%s:%d/api/localsend/v2/register", ip, config.ListenPort)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
 	if err != nil {
 		fmt.Println("Failed to create HTTP request:", err)
@@ -185,11 +184,4 @@ func registerWithHttp(ctx context.Context, ip string, data []byte) {
 		fmt.Printf("Failed to parse HTTP response from %s: %v\n", ip, err)
 		return
 	}
-	shared.Mu.Lock()
-	if _, exists := shared.DiscoveredDevices[ip]; !exists {
-		shared.DiscoveredDevices[ip] = response
-		fmt.Printf("Discovered device: %s (%s) at %s\n", response.Alias, response.DeviceModel, ip)
-	}
-	shared.Mu.Unlock()
-	// fmt.Printf("Discovered device: %s (%s) at %s\n", response.Alias, response.DeviceModel, ip)
 }

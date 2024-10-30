@@ -21,29 +21,30 @@ package discovery
 import (
 	"encoding/json"
 	"fmt"
-	"gim/localsend/discovery/shared"
 	"gim/localsend/model"
 	"net"
 	"time"
 )
 
-// StartBroadcast Sending a Broadcast Message
-func StartBroadcast() {
+// StartBroadcastUDP Sending a Broadcast Message
+func StartBroadcastUDP(config model.ConfigModel, message model.BroadcastMessage) {
 	// Set the multicast address and port
 	multicastAddr := &net.UDPAddr{
-		IP:   net.ParseIP(model.Config.UdpBroadcastAddress),
-		Port: model.Config.UdpBroadcastPort,
+		IP:   net.ParseIP(config.UdpBroadcastAddress),
+		Port: config.UdpBroadcastPort,
 	}
 
-	data, err := json.Marshal(shared.Messsage)
+	data, err := json.Marshal(message)
 	if err != nil {
 		panic(err)
 	}
-	// Create a local address and bind it to all interfaces
+
+	// Create a local address and bind it to the configure address
 	localAddr := &net.UDPAddr{
-		IP:   net.IPv4zero,
+		IP:   net.ParseIP(config.ListenAddress),
 		Port: 0,
 	}
+
 	conn, err := net.ListenUDP("udp", localAddr)
 	if err != nil {
 		fmt.Println("Error creating UDP connection:", err)

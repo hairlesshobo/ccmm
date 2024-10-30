@@ -18,10 +18,11 @@
 // =================================================================================
 package model
 
-var Config ConfigModel
+// var Config ConfigModel
 
 var defaultConfig = ConfigModel{
 	Alias:               "",
+	ListenAddress:       "0.0.0.0",
 	ListenPort:          53317,
 	UdpBroadcastAddress: "224.0.0.167",
 	UdpBroadcastPort:    53317,
@@ -29,6 +30,7 @@ var defaultConfig = ConfigModel{
 
 type ConfigModel struct {
 	Alias               string
+	ListenAddress       string
 	ListenPort          int
 	UdpBroadcastAddress string
 	UdpBroadcastPort    int

@@ -35,7 +35,7 @@ var (
 	fileNames        = make(map[string]string) // To save the file names
 )
 
-func PrepareReceive(w http.ResponseWriter, r *http.Request) {
+func PrepareReceive(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	var req model.PrepareReceiveRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -66,7 +66,7 @@ func PrepareReceive(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func ReceiveHandler(w http.ResponseWriter, r *http.Request) {
+func ReceiveHandler(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	sessionID := r.URL.Query().Get("sessionId")
 	fileID := r.URL.Query().Get("fileId")
 	token := r.URL.Query().Get("token")
@@ -134,7 +134,7 @@ func ReceiveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ReceiveHandler Handling file download requests
-func DownloadRequestHandler(w http.ResponseWriter, r *http.Request) {
+func DownloadRequestHandler(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	fileName := r.URL.Query().Get("file")
 	if fileName == "" {
 		http.Error(w, "File parameter is required", http.StatusBadRequest)

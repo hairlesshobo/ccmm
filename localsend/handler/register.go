@@ -21,15 +21,14 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"gim/localsend/discovery/shared"
+	"gim/localsend/model"
 	"net/http"
 )
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	msg := shared.Messsage
-	msg.Announce = false
+func RegisterHandler(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
+	message.Announce = false
 
-	res, err := json.Marshal(msg)
+	res, err := json.Marshal(message)
 	if err != nil {
 		fmt.Println("json convert failed:", err)
 		http.Error(w, "json convert failed", http.StatusInternalServerError)
