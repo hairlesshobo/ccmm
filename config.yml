@@ -1,10 +1,24 @@
+# The directory to which auto-imported media should be copied
 live_data_dir: /home/flip/test
+
 # Log levels:
-#  -4 DEBUG
-#  0 INFO
-#  4 WARN
-#  8 ERROR
+#   -4 DEBUG
+#   0 INFO
+#   4 WARN
+#   8 ERROR
 log_level: -4
-use_sudo: true
+
+# When running in server mode (such as the systemd service), 
+# the local address to bind to
 listen_address: 127.0.0.1
+
+# local port to bind to when running as server
 listen_port: 7273
+
+# if set, ALL import commands issued, regardless of automatic or one-off, 
+# will be forced to dry-run only
+force_dry_run: false
+
+# if set to true, any media inserted will NOT be automatically mounted, 
+# imported, etc. essentially, the insertion will be ignored completely
+disable_auto_processing: false

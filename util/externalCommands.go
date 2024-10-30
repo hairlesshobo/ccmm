@@ -53,7 +53,8 @@ func callExternalCommand(command string, arg ...string) (string, int, error) {
 	if err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			slog.Debug(fmt.Sprintf("Exit Status: %d", exiterr.ExitCode()))
-			return "", exiterr.ExitCode(), err
+			slog.Debug(fmt.Sprintf("stderr output: %s", string(exiterr.Stderr)))
+			return string(exiterr.Stderr), exiterr.ExitCode(), err
 		} else {
 			slog.Warn(fmt.Sprintf("Error occurred while calling '%s' command: %s", cmdName, err.Error()))
 			return "", -666, err

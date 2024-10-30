@@ -12,10 +12,8 @@ import (
 )
 
 var (
-	importArg_deviceId   string
 	importArg_individual bool
 	importArg_dryRun     bool
-	importArg_devicePath string
 	importArg_server     string
 
 	importCmd = &cobra.Command{
@@ -26,10 +24,8 @@ var (
 
 		Run: func(cmd *cobra.Command, args []string) {
 			var importConfig model.ImportVolume
-			importConfig.DryRun = importArg_dryRun
+			importConfig.DryRun = importArg_dryRun || model.Config.ForceDryRun
 			importConfig.VolumePath = args[0]
-			importConfig.DeviceID = importArg_deviceId
-			importConfig.DevicePath = importArg_devicePath
 
 			slog.Debug(fmt.Sprintf("%+v", importConfig))
 
@@ -50,10 +46,8 @@ var (
 )
 
 func init() {
-	importCmd.Flags().StringVarP(&importArg_deviceId, "device_id", "d", "", "Device ID path, used for mounting, unmounting, and device power control")
 	importCmd.Flags().BoolVarP(&importArg_individual, "individual", "i", false, "Run a single import without connecting to the running server")
 	importCmd.Flags().BoolVarP(&importArg_dryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
-	importCmd.Flags().StringVarP(&importArg_devicePath, "device_path", "p", "", "Full udev path of the drive to import (not implemented, will be used to control status lights)")
 	importCmd.Flags().StringVarP(&importArg_server, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
 
 	rootCmd.AddCommand(importCmd)

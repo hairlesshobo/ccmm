@@ -3,6 +3,8 @@ package util
 import (
 	"log/slog"
 	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/hairlesshobo/go-import-media/model"
 	"github.com/kelseyhightower/envconfig"
@@ -20,7 +22,40 @@ func processError(err error) {
 }
 
 func readFile(cfg *model.ConfigModel) {
-	f, err := os.Open("config.yml")
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+
+	configPath := os.Getenv("CONFIG_FILE")
+
+	if configPath == "" {
+		binPath, _ := os.Executable()
+		binDir := filepath.Dir(binPath)
+		sidecarPath := path.Join(binDir, "config.yml")
+
+		if FileExists(sidecarPath) {
+			configPath = sidecarPath
+		} else {
+			homeDir, _ := os.UserHomeDir()
+			homeDotConfigPath := path.Join(homeDir, ".config", "go-import-media.yml")
+
+			if FileExists(homeDotConfigPath) {
+				configPath = homeDotConfigPath
+			}
+		}
+	}
+
+	if configPath == "" {
+		logger.Error("No config file found")
+		os.Exit(1)
+	}
+
+	if !FileExists(configPath) {
+		logger.Error("The specified config file does not exist: " + configPath)
+		os.Exit(1)
+	}
+
+	logger.Info("Reading config from " + configPath)
+
+	f, err := os.Open(configPath)
 	if err != nil {
 		processError(err)
 	}

@@ -1,0 +1,15 @@
+[Unit]
+Description=gim
+After=multi-user.target
+
+[Service]
+ExecStart=__INSTALL_PATH__/gim server
+Type=simple
+User=__INSTALL_USER__
+Group=__INSTALL_GROUP__
+Restart=always
+
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target

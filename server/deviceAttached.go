@@ -1,0 +1,89 @@
+package server
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"time"
+
+	"github.com/hairlesshobo/go-import-media/action"
+	"github.com/hairlesshobo/go-import-media/model"
+	"github.com/hairlesshobo/go-import-media/util"
+)
+
+var (
+	shutdownDeviceAttacherChan chan struct{}
+	deviceAttacherQueueChan    chan model.DeviceAttached
+)
+
+//
+// private functions
+//
+
+func initDeviceAttachedThread() {
+	shutdownDeviceAttacherChan = make(chan struct{})
+	deviceAttacherQueueChan = make(chan model.DeviceAttached)
+
+	go deviceAttachedRoutine(deviceAttacherQueueChan, shutdownDeviceAttacherChan)
+}
+
+func cleanupDeviceAttachedThread() {
+	defer close(shutdownDeviceAttacherChan)
+	defer close(deviceAttacherQueueChan)
+}
+
+func triggerDeviceAttached(w http.ResponseWriter, r *http.Request) {
+	if model.Config.DisableAutoProcessing {
+		slog.Info("Auto processing is disabled by config file, taking no action")
+		w.WriteHeader(403)
+		return
+	}
+
+	var attachDeviceConfig model.DeviceAttached
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.Error("Failed to read request body: " + err.Error())
+	}
+
+	if err = json.Unmarshal(body, &attachDeviceConfig); err != nil {
+		slog.Error("Failed to unmarshal JSON: " + err.Error())
+	}
+
+	fmt.Printf("%+v\n", attachDeviceConfig)
+
+	if !util.FileExists(attachDeviceConfig.DevicePath) {
+		w.WriteHeader(500)
+		// TODO: write an error response (define a model?)
+	} else {
+		deviceAttacherQueueChan <- attachDeviceConfig
+		w.WriteHeader(201)
+	}
+
+}
+
+func deviceAttachedRoutine(deviceAttachedQueueChan chan model.DeviceAttached, shutdownDeviceAttachedChan chan struct{}) {
+out:
+	for {
+		select {
+		// check for shutdown signal
+		case <-shutdownDeviceAttachedChan:
+			slog.Info("Shutting down device attached routine")
+			break out
+
+		// check for attach device request
+		case attachDeviceConfig := <-deviceAttachedQueueChan:
+			slog.Info("Starting device attached job for " + attachDeviceConfig.DevicePath)
+			fmt.Printf("%+v\n", attachDeviceConfig)
+			action.DeviceAttached(attachDeviceConfig)
+		default:
+			// TODO: is this block even necessary?
+			// continue processing here
+			// // Queue draw
+		}
+
+		time.Sleep(200 * time.Millisecond)
+	}
+}

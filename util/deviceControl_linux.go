@@ -9,11 +9,12 @@ import (
 )
 
 func TestPlatform() {
-	fmt.Println(MountVolume("/dev/sda1"))
+	fmt.Println(UnmountVolume("/dev/sda1"))
 	platformNotSupported(TestPlatform)
 }
 
 func GetVolumeName(mountPath string) string {
+	slog.Info(fmt.Sprintf("Querying volume name at '%s'", mountPath))
 	command := "findmnt -n --output label --mountpoint %s0"
 	output, _, err := callExternalCommand(command, mountPath)
 	if err != nil {
@@ -43,6 +44,7 @@ func MountVolume(device string) string {
 		return existingPath
 	}
 
+	slog.Info(fmt.Sprintf("Mounting device '%s'", device))
 	command := "udisksctl mount --block-device %s0"
 	output, exitCode, _ = callExternalCommand(command, device)
 
@@ -58,7 +60,7 @@ func MountVolume(device string) string {
 func UnmountVolume(device string) bool {
 	// test to see if the provided device exists and is even mounted
 	// device is mounted
-	if pathMounted(device) {
+	if !pathMounted(device) {
 		slog.Debug(fmt.Sprintf("Device is not mounted: '%s', nothing to do.", device))
 
 		// we return true because the desire is for the provided device to be
@@ -68,6 +70,7 @@ func UnmountVolume(device string) bool {
 
 	// we use udisksctl to unmount because, supposedly, it does buffer flushing
 	// and crap that might not get done otherwise. ¯\_(ツ)_/¯
+	slog.Info(fmt.Sprintf("Unmounting device '%s'", device))
 	command := "udisksctl unmount --block-device %s0"
 	_, exitCode, _ := callExternalCommand(command, device)
 
@@ -109,6 +112,7 @@ func PowerOffDevice(device string) bool {
 		return true
 	}
 
+	slog.Info(fmt.Sprintf("Powering off device '%s'", device))
 	command := "udisksctl power-off --block-device %s0"
 	_, _, err := callExternalCommand(command, device)
 

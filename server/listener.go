@@ -17,8 +17,12 @@ import (
 
 func StartServer(listenAddress string, listenPort int32) {
 	initImporterThread()
+	initDeviceAttachedThread()
+
 	startServer(listenAddress, listenPort, setupRouting())
+
 	cleanupImporterThread()
+	cleanupDeviceAttachedThread()
 }
 
 //
@@ -55,6 +59,7 @@ func setupRouting() *chi.Mux {
 
 	router.Get("/health", healthCheck)
 	router.Post("/trigger_import", triggerImport)
+	router.Post("/device_attached", triggerDeviceAttached)
 
 	return router
 }

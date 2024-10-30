@@ -20,10 +20,6 @@ func Import(params model.ImportVolume) bool {
 	processors := processor.FindProcessors(params.VolumePath)
 	processor.ProcessSources(processors, params.DryRun)
 
-	// do empty, if enabled
-
-	// do eject, if enabled
-
 	slog.Info(fmt.Sprintf("Finished import for volume '%s'", params.VolumePath))
 
 	return true
