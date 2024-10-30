@@ -27,8 +27,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/model"
+	"gim/util"
 )
 
 var (

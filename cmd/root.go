@@ -26,8 +26,9 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/model"
+	"gim/util"
+
 	"github.com/spf13/cobra"
 )
 

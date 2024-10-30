@@ -32,8 +32,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/model"
+	"gim/util"
 )
 
 // TODO: create logger for this function?

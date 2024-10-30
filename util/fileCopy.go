@@ -28,7 +28,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/hairlesshobo/go-import-media/model"
+	"gim/model"
 )
 
 func GetQuarter(sourceFile model.SourceFile) string {

@@ -23,7 +23,7 @@
 package main
 
 import (
-	"github.com/hairlesshobo/go-import-media/cmd"
+	"gim/cmd"
 )
 
 func main() {

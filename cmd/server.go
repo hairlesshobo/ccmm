@@ -23,8 +23,9 @@
 package cmd
 
 import (
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/server"
+	"gim/model"
+	"gim/server"
+
 	"github.com/spf13/cobra"
 )
 

@@ -32,12 +32,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/processor/behringerX32"
-	"github.com/hairlesshobo/go-import-media/processor/canonEOS"
-	"github.com/hairlesshobo/go-import-media/processor/canonXA"
-	"github.com/hairlesshobo/go-import-media/processor/jackRecorder"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/model"
+	"gim/processor/behringerX32"
+	"gim/processor/canonEOS"
+	"gim/processor/canonXA"
+	"gim/processor/jackRecorder"
+	"gim/util"
 )
 
 type Processor interface {

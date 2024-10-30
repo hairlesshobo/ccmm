@@ -23,7 +23,8 @@
 package cmd
 
 import (
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/util"
+
 	"github.com/spf13/cobra"
 )
 

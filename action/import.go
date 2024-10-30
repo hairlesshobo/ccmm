@@ -26,9 +26,9 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/processor"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/model"
+	"gim/processor"
+	"gim/util"
 )
 
 func Import(params model.ImportVolume) bool {

@@ -28,9 +28,10 @@ import (
 	"net/http"
 	"os"
 
+	"gim/model"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
-	"github.com/hairlesshobo/go-import-media/model"
 )
 
 //

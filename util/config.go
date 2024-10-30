@@ -28,7 +28,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/hairlesshobo/go-import-media/model"
+	"gim/model"
+
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
 )

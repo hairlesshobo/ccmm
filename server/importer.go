@@ -30,9 +30,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hairlesshobo/go-import-media/action"
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/action"
+	"gim/model"
+	"gim/util"
 )
 
 var (

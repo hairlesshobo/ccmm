@@ -31,8 +31,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hairlesshobo/go-import-media/model"
-	"github.com/hairlesshobo/go-import-media/util"
+	"gim/model"
+	"gim/util"
+
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
 )
