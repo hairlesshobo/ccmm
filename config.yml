@@ -62,8 +62,19 @@ disable_auto_processing: false
 
 localsend:
   # The alias to use when advertising this localsend instance on the network
-  #   defaults to the hostname of the system
+  #   defaults: system hostname
   # alias:
+
+  # The path to where files received from localsend should be placed
+  #   default ./uploads/
+  storage_path: ./uploads/
+
+  # If true, the sender alias will be appended to the stoage path when receiving files.
+  # this is intended to help ensure that identically named files won't be overwritten
+  # coming from mutiple devices, as well as to provide a source name for the importer
+  # when it runs
+  #   default: true
+  append_sender_alias: true
 
   # Interface to bind to
   #   defaults: 0.0.0.0
@@ -81,9 +92,14 @@ localsend:
   #   default: 53317
   udp_broadcast_port: 53317
 
-  # This is a list of aliases that are allowed to upload to localsend.
-  # Either list off individual aliases, or create only one with the name
-  # of "__ALL__" in order to allow all devices to send
+  # This is a case-insensitive list of aliases that are allowed to upload 
+  # to localsend. Either list off individual aliases, or create only one 
+  # with the name of "__ALL__" in order to allow all devices to send
   #   default: ["__ALL__"]
   allowed_aliases:
     - __ALL__
+
+  # if specified, this password will be required in order to accept files
+  # an empty value means no password is required
+  #   default: no password required
+  require_password: ""

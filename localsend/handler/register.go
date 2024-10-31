@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gim/model"
+	"log/slog"
 	"net/http"
 )
 
@@ -30,7 +31,7 @@ func RegisterHandler(config model.LocalSendConfig, message model.BroadcastMessag
 
 	res, err := json.Marshal(message)
 	if err != nil {
-		fmt.Println("json convert failed:", err)
+		slog.Error(fmt.Sprintf("json convert failed: %s", err.Error()))
 		http.Error(w, "json convert failed", http.StatusInternalServerError)
 		return
 	}
@@ -39,8 +40,8 @@ func RegisterHandler(config model.LocalSendConfig, message model.BroadcastMessag
 	_, err = w.Write(res)
 
 	if err != nil {
+		slog.Error(fmt.Sprintf("Error writing file: %s", err.Error()))
 		http.Error(w, "Failed to write file", http.StatusInternalServerError)
-		fmt.Println("Error writing file:", err)
 		return
 	}
 }

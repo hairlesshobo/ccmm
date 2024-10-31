@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"gim/model"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"sync"
@@ -63,11 +64,12 @@ func getLocalIP() ([]net.IP, error) {
 // pingScan Use ICMP ping to scan all active devices on the LAN
 func pingScan() ([]string, error) {
 	var ips []string
+
 	ipGroup, err := getLocalIP()
-	//fmt.Println(ip)
 	if err != nil {
 		return nil, err
 	}
+
 	for _, i := range ipGroup {
 		// TODO: fix this assumption
 		ip := i.Mask(net.IPv4Mask(255, 255, 255, 0)) // Assume the subnet mask is 24
@@ -88,7 +90,7 @@ func pingScan() ([]string, error) {
 				defer wg.Done()
 				pinger, err := probing.NewPinger(ip)
 				if err != nil {
-					fmt.Println("Failed to create pinger:", err)
+					slog.Error(fmt.Sprintf("Failed to create pinger: %s", err.Error()))
 					return
 				}
 				pinger.SetPrivileged(true)
@@ -104,14 +106,13 @@ func pingScan() ([]string, error) {
 				if err != nil {
 					//Ignore ping failures
 					return
-					//fmt.Println("Failed to run pinger:", err)
 				}
 			}(targetIP)
 		}
 
 		wg.Wait()
 	}
-	// fmt.Println(ips)
+
 	return ips, nil
 }
 
@@ -120,14 +121,13 @@ func StartBroadcastHTTP(config model.LocalSendConfig, message model.BroadcastMes
 
 	for {
 		data, err := json.Marshal(message)
-		// fmt.Println(string(data))
 		if err != nil {
 			panic(err)
 		}
 
 		ips, err := pingScan()
 		if err != nil {
-			fmt.Println("Failed to discover devices via ping scan:", err)
+			slog.Warn(fmt.Sprintf("Failed to discover devices via ping scan: %s", err.Error()))
 			return
 		}
 
@@ -142,8 +142,7 @@ func StartBroadcastHTTP(config model.LocalSendConfig, message model.BroadcastMes
 		}
 
 		wg.Wait()
-		// log
-		// fmt.Println("HTTP broadcast messages sent!")
+
 		time.Sleep(5 * time.Second) // Send HTTP broadcast message every 5 seconds
 	}
 }
@@ -153,7 +152,7 @@ func registerWithHttp(config model.LocalSendConfig, ctx context.Context, ip stri
 	url := fmt.Sprintf("https://%s:%d/api/localsend/v2/register", ip, config.ListenPort)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
 	if err != nil {
-		fmt.Println("Failed to create HTTP request:", err)
+		slog.Error(fmt.Sprintf("Failed to create HTTP request: %s", err.Error()))
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -175,13 +174,13 @@ func registerWithHttp(config model.LocalSendConfig, ctx context.Context, ip stri
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Failed to read HTTP response body:", err)
+		slog.Error(fmt.Sprintf("Failed to read HTTP response body: %s", err.Error()))
 		return
 	}
 	var response model.BroadcastMessage
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		fmt.Printf("Failed to parse HTTP response from %s: %v\n", ip, err)
+		slog.Error(fmt.Sprintf("Failed to parse HTTP response from %s: %v", ip, err.Error()))
 		return
 	}
 }

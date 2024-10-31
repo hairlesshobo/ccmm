@@ -36,11 +36,14 @@ type ConfigModel struct {
 
 type LocalSendConfig struct {
 	Alias               string   `yaml:"alias,omitempty"`
+	StoragePath         string   `yaml:"storage_path"`
+	AppendSenderAlias   bool     `yaml:"append_sender_alias"`
 	ListenAddress       string   `yaml:"listen_address,omitempty"`
 	ListenPort          int      `yaml:"listen_port,omitempty"`
 	UdpBroadcastAddress string   `yaml:"udp_broadcast_address,omitempty"`
 	UdpBroadcastPort    int      `yaml:"udp_broadcast_port,omitempty"`
 	AllowedAliases      []string `yaml:"allowed_aliases"`
+	RequirePassword     string   `yaml:"require_password"`
 }
 
 var DefaultConfig = ConfigModel{
@@ -52,10 +55,13 @@ var DefaultConfig = ConfigModel{
 	DisableAutoProcessing: false,
 	LocalSend: LocalSendConfig{
 		Alias:               "",
+		StoragePath:         "./uloads",
+		AppendSenderAlias:   true,
 		ListenAddress:       "0.0.0.0",
 		ListenPort:          53317,
 		UdpBroadcastAddress: "224.0.0.167",
 		UdpBroadcastPort:    53317,
 		AllowedAliases:      []string{"__ALL__"},
+		RequirePassword:     "",
 	},
 }

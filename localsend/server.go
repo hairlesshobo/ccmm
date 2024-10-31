@@ -30,7 +30,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func RunServer(config model.LocalSendConfig) {
+func RunServer(config model.LocalSendConfig, sessionCompleteCallback func(string)) {
 	message := model.BroadcastMessage{
 		Alias:       config.Alias,
 		Version:     "2.0",
@@ -39,7 +39,7 @@ func RunServer(config model.LocalSendConfig) {
 		Fingerprint: fmt.Sprintf("%s_%d", uuid.New().String(), config.ListenPort),
 		Port:        config.ListenPort,
 		Protocol:    "http",
-		Download:    true,
+		Download:    false,
 		Announce:    true,
 	}
 
@@ -55,7 +55,7 @@ func RunServer(config model.LocalSendConfig) {
 		handler.PrepareReceive(config, message, w, r)
 	})
 	httpServer.HandleFunc("/api/localsend/v2/upload", func(w http.ResponseWriter, r *http.Request) {
-		handler.ReceiveHandler(config, message, w, r)
+		handler.ReceiveHandler(config, message, w, r, sessionCompleteCallback)
 	})
 	httpServer.HandleFunc("/api/localsend/v2/info", func(w http.ResponseWriter, r *http.Request) {
 		handler.RegisterHandler(config, message, w, r)
@@ -63,10 +63,11 @@ func RunServer(config model.LocalSendConfig) {
 	httpServer.HandleFunc("/api/localsend/v2/register", func(w http.ResponseWriter, r *http.Request) {
 		handler.RegisterHandler(config, message, w, r)
 	})
-	// Download Handler
-	httpServer.HandleFunc("/receive", func(w http.ResponseWriter, r *http.Request) {
-		handler.DownloadRequestHandler(config, message, w, r)
-	})
+	// TODO: decide if this is really needed. I doubt it is
+	// // Download Handler
+	// httpServer.HandleFunc("/receive", func(w http.ResponseWriter, r *http.Request) {
+	// 	handler.DownloadRequestHandler(config, message, w, r)
+	// })
 
 	go func() {
 		slog.Info(fmt.Sprintf("Localsend server '%s' started at %s:%d", config.Alias, config.ListenAddress, config.ListenPort))

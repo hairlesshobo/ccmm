@@ -42,7 +42,9 @@ var (
     udev or other integrations to notify the server when media has been inserted.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			go localsend.RunServer(model.Config.LocalSend)
+			go localsend.RunServer(model.Config.LocalSend, func(outputDir string) {
+				// TODO: call importer
+			})
 			server.StartServer(server_listenAddress, server_listenPort)
 		},
 	}
