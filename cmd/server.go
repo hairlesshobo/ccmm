@@ -46,8 +46,6 @@ var (
 
 		Run: func(cmd *cobra.Command, args []string) {
 			startLocalsend("0.0.0.0", 53317)
-			// startLocalsend("172.25.30.99", 53317)
-			// startLocalsend("172.25.30.124", 53318)
 			server.StartServer(server_listenAddress, server_listenPort)
 		},
 	}
