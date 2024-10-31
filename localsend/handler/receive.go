@@ -38,6 +38,7 @@ var (
 )
 
 func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
+	// TODO: add ability to check for existing file with matching size and remove it from returned file list
 	pin := r.URL.Query().Get("pin")
 
 	if config.RequirePassword != "" && pin != config.RequirePassword {
@@ -87,6 +88,7 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 
 	// Verify request parameters
 	if sessionID == "" || fileID == "" || token == "" {
+		// TODO: create a new `sessionLogger` for this instead of repeating all this code each time below
 		slog.Warn("Upload missing parameters",
 			slog.String("SessionID", sessionID),
 			slog.String("FileID", fileID),
