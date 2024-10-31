@@ -23,7 +23,6 @@
 package util
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"path"
@@ -55,7 +54,6 @@ func readFile(cfg *model.ConfigModel) {
 		binPath, _ := os.Executable()
 		binDir := filepath.Dir(binPath)
 		sidecarPath := path.Join(binDir, "config.yml")
-		fmt.Println(sidecarPath)
 
 		if FileExists(sidecarPath) {
 			configPath = sidecarPath
