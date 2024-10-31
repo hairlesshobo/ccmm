@@ -13,7 +13,7 @@
 //
 //	    Copyright (c) 2024 MeowRain
 //	    localsend-go - https://github.com/meowrain/localsend-go
-//	    License: MIT (for complete text, see LICENSE file in localsend folder)
+//	    License: MIT (for complete text, see LICENSE-MIT file in localsend folder)
 //
 // =================================================================================
 package handler
@@ -21,11 +21,11 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"gim/localsend/model"
+	"gim/model"
 	"net/http"
 )
 
-func RegisterHandler(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
+func RegisterHandler(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	message.Announce = false
 
 	res, err := json.Marshal(message)

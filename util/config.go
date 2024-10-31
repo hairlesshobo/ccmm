@@ -23,6 +23,7 @@
 package util
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"path"
@@ -30,13 +31,14 @@ import (
 
 	"gim/model"
 
-	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
 )
 
 func LoadConfig() {
+	model.Config = model.DefaultConfig
+	model.Config.LocalSend.Alias = GetHostname()
+
 	readFile(&model.Config)
-	readEnv(&model.Config)
 }
 
 func processError(err error) {
@@ -53,12 +55,13 @@ func readFile(cfg *model.ConfigModel) {
 		binPath, _ := os.Executable()
 		binDir := filepath.Dir(binPath)
 		sidecarPath := path.Join(binDir, "config.yml")
+		fmt.Println(sidecarPath)
 
 		if FileExists(sidecarPath) {
 			configPath = sidecarPath
 		} else {
 			homeDir, _ := os.UserHomeDir()
-			homeDotConfigPath := path.Join(homeDir, ".config", "go-import-media.yml")
+			homeDotConfigPath := path.Join(homeDir, ".config", "gim.yml")
 
 			if FileExists(homeDotConfigPath) {
 				configPath = homeDotConfigPath
@@ -67,8 +70,8 @@ func readFile(cfg *model.ConfigModel) {
 	}
 
 	if configPath == "" {
-		logger.Error("No config file found")
-		os.Exit(1)
+		logger.Error("No config file found, using defaults")
+		return
 	}
 
 	if !FileExists(configPath) {
@@ -86,13 +89,6 @@ func readFile(cfg *model.ConfigModel) {
 
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(cfg)
-	if err != nil {
-		processError(err)
-	}
-}
-
-func readEnv(cfg *model.ConfigModel) {
-	err := envconfig.Process("", cfg)
 	if err != nil {
 		processError(err)
 	}

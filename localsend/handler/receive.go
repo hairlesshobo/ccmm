@@ -13,7 +13,7 @@
 //
 //	    Copyright (c) 2024 MeowRain
 //	    localsend-go - https://github.com/meowrain/localsend-go
-//	    License: MIT (for complete text, see LICENSE file in localsend folder)
+//	    License: MIT (for complete text, see LICENSE-MIT file in localsend folder)
 //
 // =================================================================================
 package handler
@@ -21,7 +21,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"gim/localsend/model"
+	"gim/model"
 	"io"
 	"log/slog"
 	"net/http"
@@ -36,7 +36,7 @@ var (
 	sessions         = make(map[string]*model.ReceiveSession)
 )
 
-func PrepareReceive(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
+func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	var req model.PrepareReceiveRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -75,7 +75,7 @@ func PrepareReceive(config model.ConfigModel, message model.BroadcastMessage, w 
 	json.NewEncoder(w).Encode(resp)
 }
 
-func ReceiveHandler(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
+func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	sessionID := r.URL.Query().Get("sessionId")
 	fileID := r.URL.Query().Get("fileId")
 	token := r.URL.Query().Get("token")
@@ -179,7 +179,7 @@ func ReceiveHandler(config model.ConfigModel, message model.BroadcastMessage, w 
 }
 
 // ReceiveHandler Handling file download requests
-func DownloadRequestHandler(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
+func DownloadRequestHandler(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	fileName := r.URL.Query().Get("file")
 	if fileName == "" {
 		http.Error(w, "File parameter is required", http.StatusBadRequest)

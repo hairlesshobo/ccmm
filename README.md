@@ -52,6 +52,15 @@ Copyright (c) 2024 Steve Cross <flip@foxhollow.cc>
 >  See the License for the specific language governing permissions and
 >  limitations under the License.
 
+Portions of the code, specifically those providing localsend server functionality, were originally 
+written by MeowRain for the [`localsend-go`](https://github.com/meowrain/localsend-go) project. The 
+files in question all have the MIT license clearly mentioned in the file header. For the sake of 
+simplicity, any additions by Steve Cross to the localsend files are also licensed under the MIT 
+license. For a complete copy of the MIT license text, see the `LICENSE-MIT` file in the root of
+this project. The following copyright applies to all localsend-related files:
+
+Copyright (c) 2024 Steve Cross (additions on or after 2024-10-30)
+Copyright (c) 2024 MeowRain
 
 ## Links
 

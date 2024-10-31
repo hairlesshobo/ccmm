@@ -13,7 +13,7 @@
 //
 //	    Copyright (c) 2024 MeowRain
 //	    localsend-go - https://github.com/meowrain/localsend-go
-//	    License: MIT (for complete text, see LICENSE file in localsend folder)
+//	    License: MIT (for complete text, see LICENSE-MIT file in localsend folder)
 //
 // =================================================================================
 package model

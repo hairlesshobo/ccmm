@@ -26,9 +26,6 @@ import (
 	"gim/localsend"
 	"gim/model"
 	"gim/server"
-	"gim/util"
-
-	lsmodel "gim/localsend/model"
 
 	"github.com/spf13/cobra"
 )
@@ -45,7 +42,7 @@ var (
     udev or other integrations to notify the server when media has been inserted.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			startLocalsend("0.0.0.0", 53317)
+			go localsend.RunServer(model.Config.LocalSend)
 			server.StartServer(server_listenAddress, server_listenPort)
 		},
 	}
@@ -56,14 +53,4 @@ func init() {
 	serverCmd.Flags().Int32VarP(&server_listenPort, "port", "p", model.Config.ListenPort, "Port to start the HTTP REST server on")
 
 	rootCmd.AddCommand(serverCmd)
-}
-
-func startLocalsend(listenAddress string, port int) {
-	config := lsmodel.NewConfig()
-
-	config.Alias = util.GetHostname()
-	config.ListenAddress = listenAddress
-	config.ListenPort = port
-
-	go localsend.RunServer(config)
 }

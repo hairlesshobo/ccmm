@@ -13,7 +13,7 @@
 //
 //	    Copyright (c) 2024 MeowRain
 //	    localsend-go - https://github.com/meowrain/localsend-go
-//	    License: MIT (for complete text, see LICENSE file in localsend folder)
+//	    License: MIT (for complete text, see LICENSE-MIT file in localsend folder)
 //
 // =================================================================================
 package discovery
@@ -24,7 +24,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"gim/localsend/model"
+	"gim/model"
 	"io"
 	"net"
 	"net/http"
@@ -116,7 +116,7 @@ func pingScan() ([]string, error) {
 }
 
 // StartBroadcastHTTP Send HTTP requests to all IPs in the LAN
-func StartBroadcastHTTP(config model.ConfigModel, message model.BroadcastMessage) {
+func StartBroadcastHTTP(config model.LocalSendConfig, message model.BroadcastMessage) {
 
 	for {
 		data, err := json.Marshal(message)
@@ -149,7 +149,7 @@ func StartBroadcastHTTP(config model.ConfigModel, message model.BroadcastMessage
 }
 
 // registerWithHttp Sending HTTP Requests
-func registerWithHttp(config model.ConfigModel, ctx context.Context, ip string, data []byte) {
+func registerWithHttp(config model.LocalSendConfig, ctx context.Context, ip string, data []byte) {
 	url := fmt.Sprintf("https://%s:%d/api/localsend/v2/register", ip, config.ListenPort)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
 	if err != nil {

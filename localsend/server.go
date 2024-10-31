@@ -13,7 +13,7 @@
 //
 //	    Copyright (c) 2024 MeowRain
 //	    localsend-go - https://github.com/meowrain/localsend-go
-//	    License: MIT (for complete text, see LICENSE file in localsend folder)
+//	    License: MIT (for complete text, see LICENSE-MIT file in localsend folder)
 //
 // =================================================================================
 package localsend
@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"gim/localsend/discovery"
 	"gim/localsend/handler"
-	"gim/localsend/model"
+	"gim/model"
 	"log/slog"
 	"net/http"
 	"runtime"
@@ -30,28 +30,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// func RunServer(port) {
-// 	port := flag.Int("port", 53317, "Port to listen on")
-// 	udp_broadcast_address := flag.String("udp_address", "224.0.0.167", "Address to use for UDP multicast. Must match clients on network.")
-// 	udp_broadcast_port := flag.Int("udp_port", 53317, "Port to use for UDP multicast. Must match clients on network.")
-// 	flag.Parse()
-
-// 	hostname, err := os.Hostname()
-// 	if err != nil {
-// 		fmt.Println("Failed to get hostname, error: ", err)
-// 		os.Exit(1)
-// 	}
-
-// 	config := model.NewConfig()
-// 	config.Alias = fmt.Sprintf("%s__%d", hostname, *port)
-// 	config.ListenPort = *port
-// 	config.UdpBroadcastAddress = *udp_broadcast_address
-// 	config.UdpBroadcastPort = *udp_broadcast_port
-
-// 	RunServer(config)
-// }
-
-func RunServer(config model.ConfigModel) {
+func RunServer(config model.LocalSendConfig) {
 	message := model.BroadcastMessage{
 		Alias:       config.Alias,
 		Version:     "2.0",

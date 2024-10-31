@@ -21,27 +21,69 @@
 #
 # =================================================================================
 
+## This is the configuration file for gim. Any values not provided will
+## use the defaults
+
 # The directory to which auto-imported media should be copied
+#   default: ./uploads/
 live_data_dir: /home/flip/test
 
 # Log levels:
 #   -4 DEBUG
-#   0 INFO
-#   4 WARN
-#   8 ERROR
+#    0 INFO
+#    4 WARN
+#    8 ERROR
+#  default: 0
 log_level: -4
 
 # When running in server mode (such as the systemd service), 
 # the local address to bind to
+#   default: 127.0.0.1
 listen_address: 127.0.0.1
 
 # local port to bind to when running as server
+#   default: 7273
 listen_port: 7273
 
 # if set, ALL import commands issued, regardless of automatic or one-off, 
 # will be forced to dry-run only
+#   default: false
 force_dry_run: false
 
 # if set to true, any media inserted will NOT be automatically mounted, 
 # imported, etc. essentially, the insertion will be ignored completely
+#   default: false
 disable_auto_processing: false
+
+##
+## Embedded localsend server configuration
+##
+
+
+localsend:
+  # The alias to use when advertising this localsend instance on the network
+  #   defaults to the hostname of the system
+  # alias:
+
+  # Interface to bind to
+  #   defaults: 0.0.0.0
+  listen_address: 0.0.0.0
+
+  # TCP port to listen on for incoming localsend connections
+  #   default: 53317
+  listen_port: 53317
+
+  # Address to send localsend UDP multicast to
+  #   default: 224.0.0.167
+  udp_broadcast_address: 224.0.0.167
+
+  # Port to send and listen for multicast messages on
+  #   default: 53317
+  udp_broadcast_port: 53317
+
+  # This is a list of aliases that are allowed to upload to localsend.
+  # Either list off individual aliases, or create only one with the name
+  # of "__ALL__" in order to allow all devices to send
+  #   default: ["__ALL__"]
+  allowed_aliases:
+    - __ALL__

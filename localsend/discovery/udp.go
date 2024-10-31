@@ -13,7 +13,7 @@
 //
 //	    Copyright (c) 2024 MeowRain
 //	    localsend-go - https://github.com/meowrain/localsend-go
-//	    License: MIT (for complete text, see LICENSE file in localsend folder)
+//	    License: MIT (for complete text, see LICENSE-MIT file in localsend folder)
 //
 // =================================================================================
 package discovery
@@ -21,13 +21,13 @@ package discovery
 import (
 	"encoding/json"
 	"fmt"
-	"gim/localsend/model"
+	"gim/model"
 	"net"
 	"time"
 )
 
 // StartBroadcastUDP Sending a Broadcast Message
-func StartBroadcastUDP(config model.ConfigModel, message model.BroadcastMessage) {
+func StartBroadcastUDP(config model.LocalSendConfig, message model.BroadcastMessage) {
 	// Set the multicast address and port
 	multicastAddr := &net.UDPAddr{
 		IP:   net.ParseIP(config.UdpBroadcastAddress),
