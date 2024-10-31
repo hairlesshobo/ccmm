@@ -26,9 +26,18 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 cd $SCRIPT_DIR
 
+# for local dev purposes, protect the config file
+if [ -f ./dist/config.yml ]; then
+    mv ./dist/config.yml ./config.dist.safe.yml
+fi
+
 rm -fr ./dist
 mkdir -p ./dist/supporting
 go build -o ./dist gim.go
 cp -r ./supporting/* ./dist/supporting/
 mv ./dist/supporting/install.sh ./dist/
-cp ./config.yml ./dist/
+cp ./config.yml ./dist/config.example.yml
+
+if [ -f ./config.dist.safe.yml ]; then
+    mv ./config.dist.safe.yml ./dist/config.yml
+fi

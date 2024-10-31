@@ -30,6 +30,11 @@ OWNER=$(stat --printf="%U" $GIM_PATH)
 GROUP=$(stat --printf="%G" $GIM_PATH)
 SED_EXPRESSION="s/__INSTALL_PATH__/$SCRIPT_DIR_SAFE/g; s/__INSTALL_USER__/$OWNER/g; s/__INSTALL_GROUP__/$GROUP/g"
 
+if [ ! -f "$SCRIPT_DIR/config.yml" ]; then
+    echo "Creating config file..."
+    cp "$SCRIPT_DIR/config.example.yml" "$SCRIPT_DIR/config.yml"
+fi
+
 ## patch and copy the udev rule
 echo "Installing udev rule and reloading udev rules..."
 sed "$SED_EXPRESSION" $SCRIPT_DIR/supporting/99-gim.rules > /etc/udev/rules.d/99-gim.rules
