@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"gim/localsend/model"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -30,9 +31,9 @@ import (
 )
 
 var (
-	sessionIDCounter = 0
 	sessionMutex     sync.Mutex
-	fileNames        = make(map[string]string) // To save the file names
+	sessionIDCounter = 0
+	sessions         = make(map[string]*model.ReceiveSession)
 )
 
 func PrepareReceive(config model.ConfigModel, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
@@ -42,12 +43,19 @@ func PrepareReceive(config model.ConfigModel, message model.BroadcastMessage, w 
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	fmt.Println("Received request:", req)
+	slog.Info(fmt.Sprintf("Received request: %v", req))
 
 	sessionMutex.Lock()
 	sessionIDCounter++
 	sessionID := fmt.Sprintf("session-%d", sessionIDCounter)
 	sessionMutex.Unlock()
+
+	sessions[sessionID] = &model.ReceiveSession{
+		Alias:          req.Info.Alias,
+		TotalFiles:     0,
+		CompletedFiles: 0,
+		Files:          make(map[string]model.FileInfo),
+	}
 
 	files := make(map[string]string)
 	for fileID, fileInfo := range req.Files {
@@ -55,7 +63,8 @@ func PrepareReceive(config model.ConfigModel, message model.BroadcastMessage, w 
 		files[fileID] = token
 
 		// Save file name
-		fileNames[fileID] = fileInfo.FileName
+		sessions[sessionID].Files[fileID] = fileInfo
+		sessions[sessionID].TotalFiles += 1
 	}
 
 	resp := model.PrepareReceiveResponse{
@@ -72,22 +81,50 @@ func ReceiveHandler(config model.ConfigModel, message model.BroadcastMessage, w 
 	token := r.URL.Query().Get("token")
 
 	// Verify request parameters
-
 	if sessionID == "" || fileID == "" || token == "" {
+		slog.Warn("Upload missing parameters",
+			slog.String("SessionID", sessionID),
+			slog.String("FileID", fileID),
+			slog.String("Token", token),
+		)
 		http.Error(w, "Missing parameters", http.StatusBadRequest)
 		return
 	}
 
-	// Use fileID to get the file name
-	fileName, ok := fileNames[fileID]
+	session, ok := sessions[sessionID]
 	if !ok {
+		slog.Warn("Invalid session ID",
+			slog.String("SessionID", sessionID),
+			slog.String("FileID", fileID),
+			slog.String("Token", token),
+		)
+		http.Error(w, "Couldn't find sessionID "+sessionID, http.StatusBadRequest)
+	}
+
+	fmt.Printf("%+v\n", session)
+	// Use fileID to get the file name
+	fileEntry, ok := session.Files[fileID]
+	if !ok {
+		slog.Warn("Invalid file ID",
+			slog.String("SessionID", sessionID),
+			slog.String("FileID", fileID),
+			slog.String("Token", token),
+		)
 		http.Error(w, "Invalid file ID", http.StatusBadRequest)
 		return
 	}
+	fileName := fileEntry.FileName
+
+	slog.Info("Beginning to receive file",
+		slog.String("SessionID", sessionID),
+		slog.String("FileID", fileID),
+		slog.String("Token", token),
+		slog.String("FileName", fileName),
+	)
 
 	// TODO: fix this assumption
 	// Generate file paths, preserving file extensions
-	filePath := filepath.Join("uploads", fileName)
+	filePath := filepath.Join("uploads", session.Alias, fileName)
 
 	// Create the folder if it does not exist
 	dir := filepath.Dir(filePath)
@@ -128,8 +165,16 @@ func ReceiveHandler(config model.ConfigModel, message model.BroadcastMessage, w 
 		}
 	}
 
+	session.CompletedFiles += 1
+
 	fmt.Println("Saved file:", filePath)
 	w.WriteHeader(http.StatusOK)
+
+	if session.CompletedFiles == session.TotalFiles {
+		slog.Info(fmt.Sprintf("Session '%s' complete, transferred %d file(s)", sessionID, session.CompletedFiles))
+		delete(sessions, sessionID)
+		// TODO: take action on completed session
+	}
 
 }
 

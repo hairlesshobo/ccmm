@@ -23,7 +23,6 @@
 package cmd
 
 import (
-	"fmt"
 	"gim/localsend"
 	"gim/model"
 	"gim/server"
@@ -46,8 +45,9 @@ var (
     udev or other integrations to notify the server when media has been inserted.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			startLocalsend("172.25.30.99", 53317)
-			startLocalsend("172.25.30.124", 53318)
+			startLocalsend("0.0.0.0", 53317)
+			// startLocalsend("172.25.30.99", 53317)
+			// startLocalsend("172.25.30.124", 53318)
 			server.StartServer(server_listenAddress, server_listenPort)
 		},
 	}
@@ -61,10 +61,9 @@ func init() {
 }
 
 func startLocalsend(listenAddress string, port int) {
-	hostname := util.GetHostname()
 	config := lsmodel.NewConfig()
 
-	config.Alias = fmt.Sprintf("%s__%d", hostname, port)
+	config.Alias = util.GetHostname()
 	config.ListenAddress = listenAddress
 	config.ListenPort = port
 

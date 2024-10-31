@@ -18,6 +18,13 @@
 // =================================================================================
 package model
 
+type ReceiveSession struct {
+	Alias          string
+	TotalFiles     int
+	CompletedFiles int
+	Files          map[string]FileInfo
+}
+
 type BroadcastMessage struct {
 	Alias       string `json:"alias"`
 	Version     string `json:"version"`
