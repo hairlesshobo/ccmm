@@ -54,7 +54,7 @@ func StartServer(listenAddress string, listenPort int32) {
 
 func startServer(listenAddress string, listenPort int32, router *chi.Mux) {
 	listen := fmt.Sprintf("%s:%d", listenAddress, listenPort)
-	slog.Info("starting server on " + listen)
+	slog.Info("Started gim server on " + listen)
 	err := http.ListenAndServe(listen, router)
 
 	if err != nil {

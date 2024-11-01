@@ -70,11 +70,6 @@ func requireMultipleFileOrDir(rootDir string, items []string, needsDir bool) boo
 }
 
 func requireRegexFileOrDirMatch(rootDir string, namePattern string, needsDir bool) (bool, string) {
-	itemType := "file"
-	if needsDir {
-		itemType = "directory"
-	}
-
 	entries, err := os.ReadDir(rootDir)
 
 	if err != nil {
@@ -83,7 +78,6 @@ func requireRegexFileOrDirMatch(rootDir string, namePattern string, needsDir boo
 	}
 
 	for _, entry := range entries {
-		slog.Debug(fmt.Sprintf("util.requireRegexFileOrDirMatch: Testing for %s with pattern '%s' in path '%s'", itemType, namePattern, rootDir))
 		match, _ := regexp.MatchString(namePattern, entry.Name())
 
 		if match && ((needsDir && entry.IsDir()) || (!needsDir && !entry.IsDir())) {

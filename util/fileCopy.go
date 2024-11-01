@@ -53,7 +53,9 @@ func GetDestinationDirectoryRelative(sourceFile model.SourceFile) string {
 	quarter := GetQuarter(sourceFile)
 	serviceDate := sourceFile.CaptureDate.Format("2006-01-02")
 
-	return path.Join("_Services", quarter, serviceDate, sourceFile.MediaType, sourceFile.SourceName)
+	// TODO: add ability to configure destination folder structure
+	// return path.Join("_Services", quarter, serviceDate, sourceFile.MediaType, sourceFile.SourceName)
+	return path.Join(quarter, serviceDate, sourceFile.MediaType, sourceFile.SourceName)
 }
 
 func GetDestinationDirectory(destRootDir string, sourceFile model.SourceFile) string {

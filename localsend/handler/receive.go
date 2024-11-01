@@ -65,7 +65,8 @@ func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage
 
 	requestLogger := slog.Default().With(slog.String("Alias", req.Info.Alias))
 
-	requestLogger.Info(fmt.Sprintf("Received request: %v", req))
+	requestLogger.Info("Received upload request")
+	requestLogger.Debug(fmt.Sprintf("Request details: %v", req))
 
 	if config.RequirePassword != "" && pin != config.RequirePassword {
 		w.WriteHeader(http.StatusUnauthorized)

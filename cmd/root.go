@@ -62,4 +62,16 @@ func init() {
 		Level: slog.Level(model.Config.LogLevel),
 	}))
 	slog.SetDefault(logger)
+
+	if model.Config.ForceDryRun {
+		logger = logger.With(slog.Bool("DryRun", model.Config.ForceDryRun))
+		slog.SetDefault(logger)
+
+		slog.Info("Force dry run is ENABLED via config")
+	}
+
+	slog.Info("Configured data directory: " + model.Config.LiveDataDir)
+
+	// TODO: add config entries to enable/disable gim server
+	// TODO: add config entries to enable/disable localsend server
 }
