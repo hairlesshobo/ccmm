@@ -37,8 +37,10 @@ import (
 const mediaType = "Audio"
 
 var (
-	fileMatchPatterns = [...]string{`(.+).wav`}
-	logger            *slog.Logger
+	fileMatchPatterns = [...]string{
+		`jack/\d{4}-\d{2}-\d{2}/([\w\d_-]+).wav`,
+	}
+	logger *slog.Logger
 )
 
 type Processor struct {

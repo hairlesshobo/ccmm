@@ -45,8 +45,10 @@ type xmlResult struct {
 }
 
 var (
-	fileMatchPatterns = [...]string{`CONTENTS/CLIPS(\d+)/(\w)(\d+)(\w)(\d+)_(\d{6})(\w{2})_CANON.(MXF|XML)`}
-	logger            *slog.Logger
+	fileMatchPatterns = [...]string{
+		`CONTENTS/CLIPS(\d+)/(\w)(\d+)(\w)(\d+)_(\d{6})(\w{2})_CANON.(MXF|XML)`,
+	}
+	logger *slog.Logger
 )
 
 type Processor struct {

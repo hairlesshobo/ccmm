@@ -40,8 +40,10 @@ const expectedVolumeName = "X32"
 const mediaType = "Audio"
 
 var (
-	fileMatchPatterns = [...]string{`R_(\d{8})-(\d{6}).wav`}
-	logger            *slog.Logger
+	fileMatchPatterns = [...]string{
+		`^R_(\d{8})-(\d{6}).wav`,
+	}
+	logger *slog.Logger
 )
 
 type Processor struct {

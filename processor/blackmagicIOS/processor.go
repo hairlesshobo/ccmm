@@ -37,7 +37,7 @@ import (
 )
 
 var (
-	fileMatchPattern = `(\w)(\d{3})_(\d{8})_C(\d{3}).mov`
+	fileMatchPattern = `^(\w)(\d{3})_(\d{8})_C(\d{3}).mov`
 	logger           *slog.Logger
 )
 
