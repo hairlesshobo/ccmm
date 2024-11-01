@@ -5,8 +5,8 @@ github.com/go-chi/httplog/v2 v2.1.1 h1:ojojiu4PIaoeJ/qAO4GWUxJqvYUTobeo7zmuHQJAx
 github.com/go-chi/httplog/v2 v2.1.1/go.mod h1:/XXdxicJsp4BA5fapgIC3VuTD+z0Z/VzukoB3VDc1YE=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/hairlesshobo/go-mediainfo v1.0.0 h1:IHuVBuSsuBpvT3Jg4gM0qeSnrNRnngnEg2/jgIdQjbI=
-github.com/hairlesshobo/go-mediainfo v1.0.0/go.mod h1:3WnEFZiju9+BUy1mb6AHCbOpNN1PjlYbkkBqLQe4BMI=
+github.com/hairlesshobo/go-mediainfo v1.0.1 h1:Tbwc9OiwaG7BZZ90qkWldK53WZyl4pOesDkd7Zf05Fw=
+github.com/hairlesshobo/go-mediainfo v1.0.1/go.mod h1:3WnEFZiju9+BUy1mb6AHCbOpNN1PjlYbkkBqLQe4BMI=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/prometheus-community/pro-bing v0.4.1 h1:aMaJwyifHZO0y+h8+icUz0xbToHbia0wdmzdVZ+Kl3w=
