@@ -68,6 +68,8 @@ func triggerImport(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to unmarshal JSON: " + err.Error())
 	}
 
+	importConfig.DryRun = importConfig.DryRun || model.Config.ForceDryRun
+
 	fmt.Printf("%+v\n", importConfig)
 
 	if !util.DirectoryExists(importConfig.VolumePath) {
