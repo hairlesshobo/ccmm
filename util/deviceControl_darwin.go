@@ -36,3 +36,19 @@ func GetVolumeName(mountPath string) string {
 	_, label := path.Split(mountPath)
 	return label
 }
+
+func MountVolume(device string) string {
+	panic("Not implemented")
+}
+
+func UnmountVolume(device string) bool {
+	panic("Not implemented")
+}
+
+func GetVolumeFormat(device string) string {
+	panic("Not implemented")
+}
+
+func PowerOffDevice(device string) bool {
+	panic("Not implemented")
+}
