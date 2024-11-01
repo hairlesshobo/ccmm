@@ -39,6 +39,17 @@ func FileExists(path string) bool {
 	return true
 }
 
+func GetFileSize(path string) int64 {
+	stat, err := os.Stat(path)
+
+	if err != nil || stat.IsDir() {
+		// file doesn't exist
+		return -1
+	}
+
+	return stat.Size()
+}
+
 func requireMultipleFileOrDir(rootDir string, items []string, needsDir bool) bool {
 	itemType := "file"
 	if needsDir {

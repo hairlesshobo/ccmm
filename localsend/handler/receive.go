@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gim/model"
+	"gim/util"
 	"io"
 	"log/slog"
 	"net/http"
@@ -36,6 +37,20 @@ import (
 var (
 	sessions = make(map[string]*model.ReceiveSession)
 )
+
+func getOutputFilePath(config model.LocalSendConfig, alias string, fileName string) (string, string, error) {
+	// Generate file paths, preserving file extensions
+	outputDirectory, err := filepath.Abs(config.StoragePath)
+	if err != nil {
+		return "", "", err
+	}
+
+	if config.AppendSenderAlias {
+		outputDirectory = path.Join(outputDirectory, alias)
+	}
+
+	return outputDirectory, path.Join(outputDirectory, fileName), nil
+}
 
 func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
 	// TODO: add ability to check for existing file with matching size and remove it from returned file list
@@ -73,6 +88,22 @@ func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage
 
 	files := make(map[string]string)
 	for fileID, fileInfo := range req.Files {
+		// Get output file path to see if the file already exists and is the same size
+		_, filePath, err := getOutputFilePath(config, req.Info.Alias, fileInfo.FileName)
+		if err != nil {
+			slog.Error("Failed to get absolute output directory: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		// GetFileSize returns -1 if the file doesn't exist
+		if util.GetFileSize(filePath) == fileInfo.Size {
+			slog.Debug("File already exists and is same size, telling the sender to skip it",
+				slog.String("FileName", fileInfo.FileName),
+				slog.Int64("FileSize", fileInfo.Size),
+			)
+			continue
+		}
+
 		token := fmt.Sprintf("token-%s", fileID)
 		files[fileID] = token
 
@@ -146,18 +177,12 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 	}
 	fileName := fileEntry.FileName
 
-	// Generate file paths, preserving file extensions
-	outputDirectory, err := filepath.Abs(config.StoragePath)
+	// Get output directory and file path
+	outputDirectory, filePath, err := getOutputFilePath(config, session.Alias, fileName)
 	if err != nil {
 		slog.Error("Failed to get absolute output directory: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-
-	if config.AppendSenderAlias {
-		outputDirectory = path.Join(outputDirectory, session.Alias)
-	}
-
-	filePath := path.Join(outputDirectory, fileName)
 
 	transferLogger := sessionLogger.With(
 		slog.String("OutputDirectory", outputDirectory),
