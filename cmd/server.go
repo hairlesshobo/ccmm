@@ -23,9 +23,13 @@
 package cmd
 
 import (
+	"fmt"
 	"gim/localsend"
 	"gim/model"
 	"gim/server"
+	"gim/util"
+	"log/slog"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +47,21 @@ var (
 
 		Run: func(cmd *cobra.Command, args []string) {
 			go localsend.RunServer(model.Config.LocalSend, func(outputDir string) {
-				// TODO: call importer
+				slog.Info(fmt.Sprintf("Triggering import of '%s' directory", outputDir))
+
+				var importConfig model.ImportVolume
+				importConfig.VolumePath = outputDir
+
+				// queue the import with the server intance
+				// TODO: should be able to provide remote server address here in case i
+				// TODO: want to split localsend and import functionality between two systems
+				uri := fmt.Sprintf("http://%s:%d/trigger_import", model.Config.ListenAddress, model.Config.ListenPort)
+				_, statusCode := util.CallServer(uri, importConfig)
+
+				if statusCode != 201 {
+					slog.Error("Unknown error occurred sending request")
+					os.Exit(1)
+				}
 			})
 			server.StartServer(server_listenAddress, server_listenPort)
 		},

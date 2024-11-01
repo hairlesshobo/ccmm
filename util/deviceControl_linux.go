@@ -39,8 +39,10 @@ func GetVolumeName(mountPath string) string {
 	slog.Debug(fmt.Sprintf("Querying volume name at '%s'", mountPath))
 	command := "findmnt -n --output label --mountpoint %s0"
 	output, _, err := callExternalCommand(command, mountPath)
+
 	if err != nil {
-		panic(err)
+		slog.Debug(fmt.Sprintf("Could not get volume name from path '%s'", mountPath))
+		return ""
 	}
 
 	return strings.TrimSuffix(output, "\n")

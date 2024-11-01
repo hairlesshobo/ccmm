@@ -41,18 +41,26 @@ func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage
 	// TODO: add ability to check for existing file with matching size and remove it from returned file list
 	pin := r.URL.Query().Get("pin")
 
-	if config.RequirePassword != "" && pin != config.RequirePassword {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	var req model.PrepareReceiveRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	slog.Info(fmt.Sprintf("Received request: %v", req))
+
+	requestLogger := slog.Default().With(slog.String("Alias", req.Info.Alias))
+
+	requestLogger.Info(fmt.Sprintf("Received request: %v", req))
+
+	if config.RequirePassword != "" && pin != config.RequirePassword {
+		w.WriteHeader(http.StatusUnauthorized)
+
+		if pin != "" {
+			requestLogger.Warn("Invalid PIN provided, access denied")
+		}
+
+		return
+	}
 
 	sessionID := uuid.New().String()
 
@@ -79,6 +87,8 @@ func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+
+	requestLogger.Info("Done processing upload request, ready to receive files", slog.String("SessionID", sessionID))
 }
 
 func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request, sessionCompleteCallback func(string)) {
@@ -86,27 +96,26 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 	fileID := r.URL.Query().Get("fileId")
 	token := r.URL.Query().Get("token")
 
+	receiveLogger := slog.Default().With(
+		slog.String("SessionID", sessionID),
+		slog.String("FileID", fileID),
+		slog.String("Token", token),
+	)
+
 	// Verify request parameters
 	if sessionID == "" || fileID == "" || token == "" {
-		// TODO: create a new `sessionLogger` for this instead of repeating all this code each time below
-		slog.Warn("Upload missing parameters",
-			slog.String("SessionID", sessionID),
-			slog.String("FileID", fileID),
-			slog.String("Token", token),
-		)
+		receiveLogger.Warn("Upload missing parameters")
 		http.Error(w, "Missing parameters", http.StatusBadRequest)
 		return
 	}
 
 	session, ok := sessions[sessionID]
 	if !ok {
-		slog.Warn("Invalid session ID",
-			slog.String("SessionID", sessionID),
-			slog.String("FileID", fileID),
-			slog.String("Token", token),
-		)
+		receiveLogger.Warn("Invalid session ID")
 		http.Error(w, "Couldn't find sessionID "+sessionID, http.StatusBadRequest)
 	}
+
+	sessionLogger := receiveLogger.With(slog.String("Alias", session.Alias))
 
 	// verify access is allowed
 	// this obviously isn't a very robust access system, but its mainly meant to
@@ -123,6 +132,7 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 
 		if !allowed {
 			http.Error(w, "Access Denied", http.StatusForbidden)
+			sessionLogger.Warn("Not on the allowed list, access denied")
 			return
 		}
 	}
@@ -130,22 +140,11 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 	// Use fileID to get the file name
 	fileEntry, ok := session.Files[fileID]
 	if !ok {
-		slog.Warn("Invalid file ID",
-			slog.String("SessionID", sessionID),
-			slog.String("FileID", fileID),
-			slog.String("Token", token),
-		)
+		sessionLogger.Warn("Invalid file ID")
 		http.Error(w, "Invalid file ID", http.StatusBadRequest)
 		return
 	}
 	fileName := fileEntry.FileName
-
-	slog.Info("Beginning to receive file",
-		slog.String("SessionID", sessionID),
-		slog.String("FileID", fileID),
-		slog.String("Token", token),
-		slog.String("FileName", fileName),
-	)
 
 	// Generate file paths, preserving file extensions
 	outputDirectory, err := filepath.Abs(config.StoragePath)
@@ -160,17 +159,18 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 
 	filePath := path.Join(outputDirectory, fileName)
 
+	transferLogger := sessionLogger.With(
+		slog.String("OutputDirectory", outputDirectory),
+		slog.String("FileName", fileName),
+	)
+
+	transferLogger.Info("Beginning to receive file")
+
 	// Create the folder if it does not exist
 	err = os.MkdirAll(outputDirectory, os.ModePerm)
 	if err != nil {
 		http.Error(w, "Failed to create directory", http.StatusInternalServerError)
-		slog.Warn("Error creating directory: "+err.Error(),
-			slog.String("directory", outputDirectory),
-			slog.String("SessionID", sessionID),
-			slog.String("FileID", fileID),
-			slog.String("Token", token),
-			slog.String("FileName", fileName),
-		)
+		transferLogger.Warn("Error creating directory: " + err.Error())
 		return
 	}
 
@@ -178,14 +178,7 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 	file, err := os.Create(filePath)
 	if err != nil {
 		http.Error(w, "Failed to create file", http.StatusInternalServerError)
-		slog.Warn("Error creating file: "+err.Error(),
-			slog.String("file", filePath),
-			slog.String("SessionID", sessionID),
-			slog.String("FileID", fileID),
-			slog.String("Token", token),
-			slog.String("OutputDirectory", outputDirectory),
-			slog.String("FileName", fileName),
-		)
+		transferLogger.Warn("Error creating file: " + err.Error())
 		return
 	}
 	defer file.Close()
@@ -195,12 +188,7 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 		n, err := r.Body.Read(buffer)
 		if err != nil && err != io.EOF {
 			http.Error(w, "Failed to read file", http.StatusInternalServerError)
-			slog.Warn("Error reading file: "+err.Error(),
-				slog.String("SessionID", sessionID),
-				slog.String("FileID", fileID),
-				slog.String("Token", token),
-				slog.String("FileName", fileName),
-			)
+			transferLogger.Warn("Error reading file: " + err.Error())
 			return
 		}
 		if n == 0 {
@@ -210,13 +198,7 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 		_, err = file.Write(buffer[:n])
 		if err != nil {
 			http.Error(w, "Failed to write file", http.StatusInternalServerError)
-			slog.Warn("Error writing file: "+err.Error(),
-				slog.String("SessionID", sessionID),
-				slog.String("FileID", fileID),
-				slog.String("Token", token),
-				slog.String("OutputDirectory", outputDirectory),
-				slog.String("FileName", fileName),
-			)
+			transferLogger.Warn("Error writing file: " + err.Error())
 			return
 
 		}
@@ -224,11 +206,17 @@ func ReceiveHandler(config model.LocalSendConfig, message model.BroadcastMessage
 
 	session.CompletedFiles += 1
 
-	slog.Info(fmt.Sprintf("Finished receiving file '%s' from '%s'", filePath, session.Alias))
+	transferLogger.Info("Finished receiving file")
 	w.WriteHeader(http.StatusOK)
 
 	if session.CompletedFiles == session.TotalFiles {
-		slog.Info(fmt.Sprintf("Session '%s' complete, transferred %d file(s)", sessionID, session.CompletedFiles))
+		slog.Info(
+			fmt.Sprintf("Transfer session complete, transferred %d file(s)", session.CompletedFiles),
+			slog.String("SessionID", sessionID),
+			slog.String("FilesTransferred", fmt.Sprintf("%d", session.CompletedFiles)),
+		)
+
+		// remove the session from memory
 		delete(sessions, sessionID)
 
 		// the session has finished, execute the callback
