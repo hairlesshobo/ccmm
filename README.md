@@ -28,6 +28,7 @@ this project needs to be able to identify the type of media and organize accordi
   - Localsend can be password protected and also supports sender ACLs (not intended for real security, more to prevent accidental ingestion of data)
 
 ### Planned 
+  - Verify enough scratch space prior to accepting transfer in localsend
   - Optionally empty/format a drive after import (will be configurable per-source type)
   - Build and integrate with a microcontroller to provide LED status lights for each card reader/usb port - (this might finally be a reason for me to buy a rasberry pi.. instead of adding an arduino)
   - Add status endpoint to server API for quickly checking status of importer
