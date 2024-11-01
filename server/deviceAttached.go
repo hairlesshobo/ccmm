@@ -78,7 +78,6 @@ func triggerDeviceAttached(w http.ResponseWriter, r *http.Request) {
 
 	if !util.FileExists(attachDeviceConfig.DevicePath) {
 		w.WriteHeader(500)
-		// TODO: write an error response (define a model?)
 	} else {
 		deviceAttacherQueueChan <- attachDeviceConfig
 		w.WriteHeader(201)

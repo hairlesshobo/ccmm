@@ -72,7 +72,6 @@ func triggerImport(w http.ResponseWriter, r *http.Request) {
 
 	if !util.DirectoryExists(importConfig.VolumePath) {
 		w.WriteHeader(500)
-		// TODO: write an error response (define a model?)
 	} else {
 		importQueueChan <- importConfig
 		w.WriteHeader(201)

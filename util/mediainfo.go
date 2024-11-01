@@ -20,46 +20,22 @@
 //		limitations under the License.
 //
 // =================================================================================
-package cmd
+package util
 
 import (
+	"fmt"
 	"log/slog"
-	"os"
 
-	"gim/model"
-	"gim/util"
-
-	"github.com/spf13/cobra"
+	"github.com/hairlesshobo/go-mediainfo"
 )
 
-// rootCmd represents the base command when called without any subcommands
-
-var (
-	rootCmd = &cobra.Command{
-		Use:   "go-import-media",
-		Short: "media importer",
-		Long:  `Custom tool for identifying source media and importing to appropriate destination`,
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
-		// Run: func(cmd *cobra.Command, args []string) { },
+func MediaInfo_GetGeneralParameter(filePath string, parameter string) string {
+	mi := mediainfo.New()
+	defer mi.Close()
+	if err := mi.Open(filePath); err != nil {
+		slog.Error(fmt.Sprintf("Failed to open file '%s' for reading mediainfo", filePath))
+		return ""
 	}
-)
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
-
-	if err != nil {
-		os.Exit(1)
-	}
-}
-
-func init() {
-	util.LoadConfig()
-
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.Level(model.Config.LogLevel),
-	}))
-	slog.SetDefault(logger)
+	return mi.Get(mediainfo.StreamGeneral, 0, parameter)
 }

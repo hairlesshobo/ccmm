@@ -40,7 +40,7 @@ func Import(params model.ImportVolume) bool {
 	}
 
 	processors := processor.FindProcessors(params.VolumePath)
-	processor.ProcessSources(processors, params.DryRun)
+	processor.ProcessSources(processors, params.DryRun, params.Dump)
 
 	slog.Info(fmt.Sprintf("Finished import for volume '%s'", params.VolumePath))
 

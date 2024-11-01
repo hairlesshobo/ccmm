@@ -38,6 +38,8 @@ var (
 	deviceAttached_individual bool
 	deviceAttached_dryRun     bool
 	deviceAttached_server     string
+	deviceAttached_noUnmount  bool
+	deviceAttached_noPoweroff bool
 
 	deviceAttachedCmd = &cobra.Command{
 		Use:   "device_attached [flags] device_path",
@@ -49,6 +51,8 @@ var (
 			var deviceAttachedConfig model.DeviceAttached
 			deviceAttachedConfig.DryRun = deviceAttached_dryRun || model.Config.ForceDryRun
 			deviceAttachedConfig.DevicePath = args[0]
+			deviceAttachedConfig.NoUnmount = deviceAttached_noUnmount
+			deviceAttachedConfig.NoPoweroff = deviceAttached_noPoweroff
 
 			slog.Debug(fmt.Sprintf("%+v", deviceAttachedConfig))
 
@@ -69,9 +73,10 @@ var (
 )
 
 func init() {
-	// TODO: add options for disabling auto dismount, auto poweroff, etc
 	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_individual, "individual", "i", false, "Run a single import without connecting to the running server")
 	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_dryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
+	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_noUnmount, "no_unmount", "u", false, "Prevents the job from automatically unmounting the device when finished processing")
+	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_noPoweroff, "no_poweroff", "p", false, "Prevents thje job from automatically powering off the device when finished processing")
 	deviceAttachedCmd.Flags().StringVarP(&deviceAttached_server, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
 
 	rootCmd.AddCommand(deviceAttachedCmd)

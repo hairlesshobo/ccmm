@@ -37,7 +37,6 @@ import (
 	"gim/util"
 )
 
-// TODO: create logger for this function?
 const expectedVolumeName = "CANON"
 const mediaType = "Video"
 
@@ -45,49 +44,56 @@ type xmlResult struct {
 	Value string `xml:"Device>ModelName"`
 }
 
-var fileMatchPatterns = [...]string{`CONTENTS/CLIPS(\d+)/(\w)(\d+)(\w)(\d+)_(\d{6})(\w{2})_CANON.(MXF|XML)`}
+var (
+	fileMatchPatterns = [...]string{`CONTENTS/CLIPS(\d+)/(\w)(\d+)(\w)(\d+)_(\d{6})(\w{2})_CANON.(MXF|XML)`}
+	logger            *slog.Logger
+)
 
 type Processor struct {
 	sourceDir string
 }
 
-func (t *Processor) SetSourceDir(sourceDir string) {
-	t.sourceDir = sourceDir
+func New(sourceDir string) *Processor {
+	logger = slog.Default().With(slog.String("processor", "canonXA"))
+
+	return &Processor{
+		sourceDir: sourceDir,
+	}
 }
 
 func (t *Processor) CheckSource() bool {
-	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Beginning to test volume compatibility for '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
 
 	// verify volume label matches what the camera sets
-	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Testing volume name at '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing volume name at '%s'", t.sourceDir))
 	if label := util.GetVolumeName(t.sourceDir); label != expectedVolumeName {
-		slog.Debug(fmt.Sprintf("canonXA.CheckSource: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
+		logger.Debug(fmt.Sprintf("[CheckSource]: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}
 
 	// check for /CONTENTS and /DCIM directories
-	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Testing for required directories for volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
 	if !util.RequireDirs(t.sourceDir, []string{"CONTENTS", "DCIM"}) {
-		slog.Debug("canonXA.CheckSource: One or more required directories does not exist on source, disqualified")
+		logger.Debug("[CheckSource]: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
 	// check for CONTENTS/CLIPS(\d+)
-	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Testing for existence of CONTENTS/CLIPSxxx directory in volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of CONTENTS/CLIPSxxx directory in volume '%s'", t.sourceDir))
 	exists, clipsPath := util.RequireRegexDirMatch(path.Join(t.sourceDir, "CONTENTS"), `CLIPS(\d+)`)
 	if !exists {
-		slog.Debug("canonXA.CheckSource: No '/CONTENTS/CLIPSXXX/' directory found, disqualified")
+		logger.Debug("[CheckSource]: No '/CONTENTS/CLIPSXXX/' directory found, disqualified")
 		return false
 	}
 
 	// check for CONTENTS/CLIPS(\d+)/INDEX.MIF file
-	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Testing for existence of CONTENTS/CLIPSxxx/INDEX.MIF in volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of CONTENTS/CLIPSxxx/INDEX.MIF in volume '%s'", t.sourceDir))
 	if !util.RequireFiles(clipsPath, []string{"INDEX.MIF"}) {
-		slog.Debug("canonXA.CheckSource: INDEX.MIF file not found in CLIPS directory, disqualified")
+		logger.Debug("[CheckSource]: INDEX.MIF file not found in CLIPS directory, disqualified")
 		return false
 	}
 
-	slog.Debug(fmt.Sprintf("canonXA.CheckSource: Volume '%s' is compatible", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Volume '%s' is compatible", t.sourceDir))
 	return true
 }
 
@@ -105,18 +111,18 @@ func getSourceName(mediaPath string) string {
 
 	x := xmlResult{"Unknown"}
 
-	slog.Debug(fmt.Sprintf("canonXA.getSourceName: Reading SourceName from file '%s'", sidecarFile))
+	logger.Debug(fmt.Sprintf("[getSourceName]: Reading SourceName from file '%s'", sidecarFile))
 
 	xmlFile, err := os.Open(sidecarFile)
 	if err != nil {
-		slog.Error(fmt.Sprintf("canonXA.getSourceName: Failed to open sidecar file '%s': %s", sidecarFile, err.Error()))
+		logger.Error(fmt.Sprintf("[getSourceName]: Failed to open sidecar file '%s': %s", sidecarFile, err.Error()))
 	} else {
 		defer xmlFile.Close()
 
 		byteValue, _ := io.ReadAll(xmlFile)
 		err := xml.Unmarshal(byteValue, &x)
 		if err != nil {
-			slog.Error(fmt.Sprintf("error: %v", err))
+			logger.Error(fmt.Sprintf("error: %v", err))
 		}
 	}
 
@@ -129,14 +135,14 @@ func getCaptureDate(fileName string) time.Time {
 	dtm, err := time.Parse("060102 MST", fmt.Sprintf("%s %s", datePart, zone))
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("canonXA.getCaptureDate: Failed to parse date '%s': %s", datePart, err.Error()))
+		logger.Error(fmt.Sprintf("[getCaptureDate]: Failed to parse date '%s': %s", datePart, err.Error()))
 	}
 
 	return dtm
 }
 
 func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
-	slog.Debug(fmt.Sprintf("canonXA.scanDirectory: Scanning for source files at path '%s'", absoluteDirPath))
+	logger.Debug(fmt.Sprintf("[scanDirectory]: Scanning for source files at path '%s'", absoluteDirPath))
 
 	var files []model.SourceFile
 
@@ -145,7 +151,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 	entries, err := os.ReadDir(absoluteDirPath)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("canonXA.scanDirectory: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
+		logger.Error(fmt.Sprintf("[scanDirectory]: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
 		return nil
 	}
 
@@ -166,7 +172,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 			}
 
 			if foundMatch {
-				slog.Debug(fmt.Sprintf("canonXA.scanDirectory: Matched file '%s'", fullPath))
+				logger.Debug(fmt.Sprintf("[scanDirectory]: Matched file '%s'", fullPath))
 
 				stat, _ := os.Stat(fullPath)
 

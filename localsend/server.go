@@ -63,11 +63,6 @@ func RunServer(config model.LocalSendConfig, sessionCompleteCallback func(string
 	httpServer.HandleFunc("/api/localsend/v2/register", func(w http.ResponseWriter, r *http.Request) {
 		handler.RegisterHandler(config, message, w, r)
 	})
-	// TODO: decide if this is really needed. I doubt it is
-	// // Download Handler
-	// httpServer.HandleFunc("/receive", func(w http.ResponseWriter, r *http.Request) {
-	// 	handler.DownloadRequestHandler(config, message, w, r)
-	// })
 
 	go func() {
 		slog.Info(fmt.Sprintf("Localsend server '%s' started at %s:%d", config.Alias, config.ListenAddress, config.ListenPort))
@@ -78,7 +73,6 @@ func RunServer(config model.LocalSendConfig, sessionCompleteCallback func(string
 		}
 	}()
 
-	// Slog("Waiting to receive files...")
 	// TODO: need graceful shutdown?
 	select {} // Blocking program waiting to receive file
 }

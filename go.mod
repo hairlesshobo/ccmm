@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/httplog/v2 v2.1.1
 	github.com/google/uuid v1.6.0
+	github.com/hairlesshobo/go-mediainfo v1.0.0
 	github.com/prometheus-community/pro-bing v0.4.1
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/spf13/cobra v1.8.1

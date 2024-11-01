@@ -34,38 +34,44 @@ import (
 	"gim/util"
 )
 
-// TODO: create logger for this function?
 const mediaType = "Audio"
 
-var fileMatchPatterns = [...]string{`(.+).wav`}
+var (
+	fileMatchPatterns = [...]string{`(.+).wav`}
+	logger            *slog.Logger
+)
 
 type Processor struct {
 	sourceDir string
 }
 
-func (t *Processor) SetSourceDir(sourceDir string) {
-	t.sourceDir = sourceDir
+func New(sourceDir string) *Processor {
+	logger = slog.Default().With(slog.String("processor", "jackRecorder"))
+
+	return &Processor{
+		sourceDir: sourceDir,
+	}
 }
 
 func (t *Processor) CheckSource() bool {
-	slog.Debug(fmt.Sprintf("jackRecorder.CheckSource: Beginning to test volume compatibility for '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
 
 	// check for jack directory
-	slog.Debug(fmt.Sprintf("jackRecorder.CheckSource: Testing for required directories for volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
 	if !util.RequireDirs(t.sourceDir, []string{"jack"}) {
-		slog.Debug("jackRecorder.CheckSource: One or more required directories does not exist on source, disqualified")
+		logger.Debug("[CheckSource]: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
 	// check for jack/(\d{4})-(\d{2})-(\d{2})
-	slog.Debug(fmt.Sprintf(`jackRecorder.CheckSource: Testing for existence of jack/(\d{4})-(\d{2})-(\d{2}) directory in volume '%s'`, t.sourceDir))
+	logger.Debug(fmt.Sprintf(`[CheckSource]: Testing for existence of jack/(\d{4})-(\d{2})-(\d{2}) directory in volume '%s'`, t.sourceDir))
 	exists, _ := util.RequireRegexDirMatch(path.Join(t.sourceDir, "jack"), `(\d{4})-(\d{2})-(\d{2})`)
 	if !exists {
-		slog.Debug(`jackRecorder.CheckSource: No '/jack/(\d{4})-(\d{2})-(\d{2})/' directory found, disqualified`)
+		logger.Debug(`[CheckSource]: No '/jack/(\d{4})-(\d{2})-(\d{2})/' directory found, disqualified`)
 		return false
 	}
 
-	slog.Debug(fmt.Sprintf("jackRecorder.CheckSource: Volume '%s' is compatible", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Volume '%s' is compatible", t.sourceDir))
 	return true
 }
 
@@ -81,14 +87,14 @@ func getCaptureDate(directoryName string) time.Time {
 	dtm, err := time.Parse("2006-01-02 MST", dtmStr)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("jackRecorder.getCaptureDate: Failed to parse date '%s': %s", dtmStr, err.Error()))
+		logger.Error(fmt.Sprintf("[getCaptureDate]: Failed to parse date '%s': %s", dtmStr, err.Error()))
 	}
 
 	return dtm
 }
 
 func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
-	slog.Debug(fmt.Sprintf("jackRecorder.scanDirectory: Scanning for source files at path '%s'", absoluteDirPath))
+	logger.Debug(fmt.Sprintf("[scanDirectory]: Scanning for source files at path '%s'", absoluteDirPath))
 
 	var files []model.SourceFile
 
@@ -96,7 +102,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 	entries, err := os.ReadDir(absoluteDirPath)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("jackRecorder.scanDirectory: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
+		logger.Error(fmt.Sprintf("[scanDirectory]: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
 		return nil
 	}
 
@@ -117,7 +123,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 			}
 
 			if foundMatch {
-				slog.Debug(fmt.Sprintf("jackRecorder.scanDirectory: Matched file '%s'", fullPath))
+				logger.Debug(fmt.Sprintf("[scanDirectory]: Matched file '%s'", fullPath))
 
 				stat, _ := os.Stat(fullPath)
 				_, dirName := path.Split(absoluteDirPath)

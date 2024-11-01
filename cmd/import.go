@@ -38,6 +38,7 @@ var (
 	importArg_individual bool
 	importArg_dryRun     bool
 	importArg_server     string
+	importArg_dump       bool
 
 	importCmd = &cobra.Command{
 		Use:   "import [flags] volume_path",
@@ -49,6 +50,7 @@ var (
 			var importConfig model.ImportVolume
 			importConfig.DryRun = importArg_dryRun || model.Config.ForceDryRun
 			importConfig.VolumePath = args[0]
+			importConfig.Dump = importArg_dump
 
 			slog.Debug(fmt.Sprintf("%+v", importConfig))
 
@@ -71,6 +73,7 @@ var (
 func init() {
 	importCmd.Flags().BoolVarP(&importArg_individual, "individual", "i", false, "Run a single import without connecting to the running server")
 	importCmd.Flags().BoolVarP(&importArg_dryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
+	importCmd.Flags().BoolVarP(&importArg_dump, "dump", "d", false, "If set, dump the list of scanned files to json and exit (for debugging only)")
 	importCmd.Flags().StringVarP(&importArg_server, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
 
 	rootCmd.AddCommand(importCmd)

@@ -46,7 +46,7 @@ func processError(err error) {
 }
 
 func readFile(cfg *model.ConfigModel) {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
 	configPath := os.Getenv("CONFIG_FILE")
 

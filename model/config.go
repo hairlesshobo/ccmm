@@ -25,12 +25,13 @@ package model
 var Config ConfigModel
 
 type ConfigModel struct {
-	LiveDataDir           string          `yaml:"live_data_dir" envconfig:"LIVE_DATA_DIR,omitempty"`
-	LogLevel              int8            `yaml:"log_level" envconfig:"LOG_LEVEL,omitempty"`
-	ListenAddress         string          `yaml:"listen_address" envconfig:"LISTEN_ADDRESS,omitempty"`
-	ListenPort            int32           `yaml:"listen_port" envconfig:"LISTEN_PORT,omitempty"`
-	ForceDryRun           bool            `yaml:"force_dry_run" envconfig:"FORCE_DRY_RUN,omitempty"`
-	DisableAutoProcessing bool            `yaml:"disable_auto_processing" envconfig:"DISABLE_AUTO_PROCESSING,omitempty"`
+	LiveDataDir           string          `yaml:"live_data_dir"`
+	LogLevel              int8            `yaml:"log_level"`
+	ListenAddress         string          `yaml:"listen_address"`
+	ListenPort            int32           `yaml:"listen_port"`
+	ForceDryRun           bool            `yaml:"force_dry_run"`
+	DisableAutoProcessing bool            `yaml:"disable_auto_processing"`
+	EnabledProcessors     []string        `yaml:"enabled_processors"`
 	LocalSend             LocalSendConfig `yaml:"localsend"`
 }
 
@@ -53,6 +54,7 @@ var DefaultConfig = ConfigModel{
 	ListenPort:            7273,
 	ForceDryRun:           false,
 	DisableAutoProcessing: false,
+	EnabledProcessors:     []string{},
 	LocalSend: LocalSendConfig{
 		Alias:               "",
 		StoragePath:         "./uloads",

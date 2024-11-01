@@ -36,39 +36,45 @@ import (
 	"gim/util"
 )
 
-// TODO: create logger for this function?
 const expectedVolumeName = "X32"
 const mediaType = "Audio"
 
-var fileMatchPatterns = [...]string{`R_(\d{8})-(\d{6}).wav`}
+var (
+	fileMatchPatterns = [...]string{`R_(\d{8})-(\d{6}).wav`}
+	logger            *slog.Logger
+)
 
 type Processor struct {
 	sourceDir string
 }
 
-func (t *Processor) SetSourceDir(sourceDir string) {
-	t.sourceDir = sourceDir
+func New(sourceDir string) *Processor {
+	logger = slog.Default().With(slog.String("processor", "behringerX32"))
+
+	return &Processor{
+		sourceDir: sourceDir,
+	}
 }
 
 func (t *Processor) CheckSource() bool {
-	slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Beginning to test volume compatibility for '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
 
 	// verify volume label matches what is expected
-	slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Testing volume name at '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing volume name at '%s'", t.sourceDir))
 	if label := util.GetVolumeName(t.sourceDir); !strings.HasPrefix(label, expectedVolumeName) {
-		slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Volume label '%s' does not start with required '%s' value, disqualified", label, expectedVolumeName))
+		logger.Debug(fmt.Sprintf("[CheckSource]: Volume label '%s' does not start with required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}
 
 	// check for recorded audio files
-	slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Testing for existence of '%s' file in volume '%s'", fileMatchPatterns[0], t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of '%s' file in volume '%s'", fileMatchPatterns[0], t.sourceDir))
 	exists, _ := util.RequireRegexFileMatch(t.sourceDir, fileMatchPatterns[0])
 	if !exists {
-		slog.Debug(fmt.Sprintf("behringerX32.CheckSource: No '%s' file found, disqualified", fileMatchPatterns[0]))
+		logger.Debug(fmt.Sprintf("[CheckSource]: No '%s' file found, disqualified", fileMatchPatterns[0]))
 		return false
 	}
 
-	slog.Debug(fmt.Sprintf("behringerX32.CheckSource: Volume '%s' is compatible", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Volume '%s' is compatible", t.sourceDir))
 	return true
 }
 
@@ -86,14 +92,14 @@ func getCaptureDate(fileName string) time.Time {
 	dtm, err := time.Parse("20060102 MST", dtmStr)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("behringerX32.getCaptureDate: Failed to parse date '%s': %s", dtmStr, err.Error()))
+		logger.Error(fmt.Sprintf("[getCaptureDate]: Failed to parse date '%s': %s", dtmStr, err.Error()))
 	}
 
 	return dtm
 }
 
 func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
-	slog.Debug(fmt.Sprintf("behringerX32.scanDirectory: Scanning for source files at path '%s'", absoluteDirPath))
+	logger.Debug(fmt.Sprintf("[scanDirectory]: Scanning for source files at path '%s'", absoluteDirPath))
 
 	var files []model.SourceFile
 
@@ -101,7 +107,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 	entries, err := os.ReadDir(absoluteDirPath)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("behringerX32.scanDirectory: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
+		logger.Error(fmt.Sprintf("[scanDirectory]: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
 		return nil
 	}
 
@@ -120,7 +126,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 			}
 
 			if foundMatch {
-				slog.Debug(fmt.Sprintf("behringerX32.scanDirectory: Matched file '%s'", fullPath))
+				logger.Debug(fmt.Sprintf("[scanDirectory]: Matched file '%s'", fullPath))
 
 				stat, _ := os.Stat(fullPath)
 

@@ -40,56 +40,60 @@ import (
 
 const expectedVolumeName = "EOS_DIGITAL"
 
-// TODO: do i need to add support for multiple xxxCANON folders in the copy structure?
-
-// TODO: add support for handling videos as well
-var fileMatchPatterns = [...]string{
-	`DCIM/(\d+)CANON/IMG_(\d+).CR2`,
-	`DCIM/(\d+)CANON/MVI_(\d+).MOV`,
-}
+var (
+	fileMatchPatterns = [...]string{
+		`DCIM/(\d+)CANON/IMG_(\d+).CR2`,
+		`DCIM/(\d+)CANON/MVI_(\d+).MOV`,
+	}
+	logger *slog.Logger
+)
 
 type Processor struct {
 	sourceDir  string
 	sourceName string
 }
 
-func (t *Processor) SetSourceDir(sourceDir string) {
-	t.sourceDir = sourceDir
-	t.sourceName = ""
+func New(sourceDir string) *Processor {
+	logger = slog.Default().With(slog.String("processor", "canonEOS"))
+
+	return &Processor{
+		sourceDir:  sourceDir,
+		sourceName: "",
+	}
 }
 
 func (t *Processor) CheckSource() bool {
-	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Beginning to test volume compatibility for '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
 
 	// verify volume label matches what the camera sets
-	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Testing volume name at '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing volume name at '%s'", t.sourceDir))
 	if label := util.GetVolumeName(t.sourceDir); label != expectedVolumeName {
-		slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
+		logger.Debug(fmt.Sprintf("[CheckSource]: Volume label '%s' does not match required '%s' value, disqualified", label, expectedVolumeName))
 		return false
 	}
 
 	// check for /DCIM and /MISC and /DCIM/EOSMISC directories
-	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Testing for required directories for volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
 	if !util.RequireDirs(t.sourceDir, []string{"DCIM", "MISC", "DCIM/EOSMISC"}) {
-		slog.Debug("canonEOS.CheckSource: One or more required directories does not exist on source, disqualified")
+		logger.Debug("[CheckSource]: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
 	// check for DCIM/(\d+)CANON directory
-	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Testing for existence of DCIM/xxxCANON directory in volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of DCIM/xxxCANON directory in volume '%s'", t.sourceDir))
 	if exists, _ := util.RequireRegexDirMatch(path.Join(t.sourceDir, "DCIM"), `(\d+)CANON`); !exists {
-		slog.Debug("canonEOS.CheckSource: No '/DCIM/xxxCANON/' directory found, disqualified")
+		logger.Debug("[CheckSource]: No '/DCIM/xxxCANON/' directory found, disqualified")
 		return false
 	}
 
 	// check for DCIM/EOSMISC/Mxxxx.CTG file
-	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Testing for existence of DCIM/EOSMISC/Mxxxx.CTG file in volume '%s'", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of DCIM/EOSMISC/Mxxxx.CTG file in volume '%s'", t.sourceDir))
 	if exists, _ := util.RequireRegexFileMatch(path.Join(t.sourceDir, "DCIM", "EOSMISC"), `M(\d+).CTG`); !exists {
-		slog.Debug("canonEOS.CheckSource: No '/DCIM/EOSMISC/Mxxxx.CTG' file found, disqualified")
+		logger.Debug("[CheckSource]: No '/DCIM/EOSMISC/Mxxxx.CTG' file found, disqualified")
 		return false
 	}
 
-	slog.Debug(fmt.Sprintf("canonEOS.CheckSource: Volume '%s' is compatible", t.sourceDir))
+	logger.Debug(fmt.Sprintf("[CheckSource]: Volume '%s' is compatible", t.sourceDir))
 	return true
 }
 
@@ -107,10 +111,10 @@ func (t *Processor) getCameraModel(imagePath string) string {
 		return t.sourceName
 	}
 
-	slog.Debug(fmt.Sprintf("Reading EXIF data from '%s'", imagePath))
+	logger.Debug(fmt.Sprintf("Reading EXIF data from '%s'", imagePath))
 	imageFile, err := os.Open(imagePath)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to open image file: %s", err.Error()))
+		logger.Error(fmt.Sprintf("Failed to open image file: %s", err.Error()))
 		return ""
 	}
 	defer imageFile.Close()
@@ -121,7 +125,7 @@ func (t *Processor) getCameraModel(imagePath string) string {
 
 	x, err := exif.Decode(imageFile)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to decode exif data in image file: %s", err.Error()))
+		logger.Error(fmt.Sprintf("Failed to decode exif data in image file: %s", err.Error()))
 		return ""
 	}
 
@@ -137,14 +141,14 @@ func (t *Processor) getCaptureDate(dtm time.Time) time.Time {
 	date, err := time.Parse(format, dtm.Format(format))
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to parse date, error: %s", err.Error()))
+		logger.Error(fmt.Sprintf("Failed to parse date, error: %s", err.Error()))
 	}
 
 	return date
 }
 
 func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
-	slog.Debug(fmt.Sprintf("canonEOS.scanDirectory: Scanning for source files at path '%s'", absoluteDirPath))
+	logger.Debug(fmt.Sprintf("[scanDirectory]: Scanning for source files at path '%s'", absoluteDirPath))
 
 	var files []model.SourceFile
 
@@ -153,7 +157,7 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 	entries, err := os.ReadDir(absoluteDirPath)
 
 	if err != nil {
-		slog.Error(fmt.Sprintf("canonEOS.scanDirectory: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
+		logger.Error(fmt.Sprintf("[scanDirectory]: Error occured while scanning directory '%s': %s", absoluteDirPath, err.Error()))
 		return nil
 	}
 
@@ -174,7 +178,7 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 			}
 
 			if foundMatch {
-				slog.Debug(fmt.Sprintf("canonEOS.scanDirectory: Matched file '%s'", fullPath))
+				logger.Debug(fmt.Sprintf("[scanDirectory]: Matched file '%s'", fullPath))
 
 				stat, _ := os.Stat(fullPath)
 

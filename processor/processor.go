@@ -23,17 +23,19 @@
 package processor
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
 	"path"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
 	"gim/model"
 	"gim/processor/behringerX32"
+	"gim/processor/blackmagicIOS"
 	"gim/processor/canonEOS"
 	"gim/processor/canonXA"
 	"gim/processor/jackRecorder"
@@ -41,21 +43,40 @@ import (
 )
 
 type Processor interface {
-	SetSourceDir(sourceDir string)
 	CheckSource() bool
 	EnumerateFiles() []model.SourceFile
 }
 
+func useProcessor(name string) bool {
+	return len(model.Config.EnabledProcessors) == 0 || slices.Contains(model.Config.EnabledProcessors, name)
+}
+
 func initProcessors(volumePath string) []Processor {
-	processors := []Processor{
-		&canonXA.Processor{},
-		&canonEOS.Processor{},
-		&behringerX32.Processor{},
-		&jackRecorder.Processor{},
+	processors := []Processor{}
+
+	// I hate this. it hurts me. this should be in a map that is referenced and
+	// then dynamically creates a new instance using reflection, but i'm still
+	// new and couldn't figure it out quickly in go land, so i decided to go this
+	// route for now. gross, but works.
+
+	if useProcessor("behringerX32") {
+		processors = append(processors, behringerX32.New(volumePath))
 	}
 
-	for _, processor := range processors {
-		processor.SetSourceDir(volumePath)
+	if useProcessor("blackmagicIOS") {
+		processors = append(processors, blackmagicIOS.New(volumePath))
+	}
+
+	if useProcessor("canonEOS") {
+		processors = append(processors, canonEOS.New(volumePath))
+	}
+
+	if useProcessor("canonXA") {
+		processors = append(processors, canonXA.New(volumePath))
+	}
+
+	if useProcessor("jackRecorder") {
+		processors = append(processors, jackRecorder.New(volumePath))
 	}
 
 	return processors
@@ -86,23 +107,20 @@ func FindProcessors(volumePath string) []Processor {
 	return foundProcessors
 }
 
-func ProcessSources(processors []Processor, dryRun bool) bool {
-	success := true
+func ProcessSources(processors []Processor, dryRun bool, dump bool) {
 	for _, processor := range processors {
-		success = success && ProcessSource(processor, dryRun)
+		ProcessSource(processor, dryRun, dump)
 	}
-
-	// TODO: is this necessary?
-	return success
 }
 
-func ProcessSource(processor Processor, dryRun bool) bool {
+func ProcessSource(processor Processor, dryRun bool, dump bool) {
 	files := processor.EnumerateFiles()
 
-	//j, _ := json.MarshalIndent(files, "", "  ")
-	//fmt.Println(string(j))
-
-	//return true
+	if dump {
+		j, _ := json.MarshalIndent(files, "", "  ")
+		fmt.Println(string(j))
+		return
+	}
 
 	for _, sourceFile := range files {
 		destDir := util.GetDestinationDirectory(model.Config.LiveDataDir, sourceFile)
@@ -138,7 +156,4 @@ func ProcessSource(processor Processor, dryRun bool) bool {
 
 		os.Chtimes(destPath, time.Time{}, sourceFile.FileModTime)
 	}
-
-	// TODO: umm.. do i need a return? maybe some error handling...
-	return true
 }
