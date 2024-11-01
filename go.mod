@@ -1,4 +1,4 @@
-module gim
+module ccmm
 
 go 1.22.5
 

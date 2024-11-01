@@ -28,7 +28,7 @@ import (
 	"os"
 	"path"
 
-	"gim/model"
+	"ccmm/model"
 )
 
 func GetQuarter(sourceFile model.SourceFile) string {

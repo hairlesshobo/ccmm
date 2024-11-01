@@ -28,7 +28,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"gim/model"
+	"ccmm/model"
 
 	"gopkg.in/yaml.v2"
 )
