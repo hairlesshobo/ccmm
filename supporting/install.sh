@@ -1,7 +1,7 @@
 #!/bin/bash
 # =================================================================================
 #
-#		gim - https://www.foxhollow.cc/projects/gim/
+#		ccmm - https://www.foxhollow.cc/projects/ccmm/
 #
 #	 go-import-media, aka gim, is a tool for automatically importing media
 #	 from removable disks into a predefined folder structure automatically.

@@ -1,3 +1,5 @@
 dist/
 uploads/
 gim
+.DS_Store
+._*

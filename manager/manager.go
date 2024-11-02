@@ -1,6 +1,6 @@
 // =================================================================================
 //
-//		gim - https://www.foxhollow.cc/projects/gim/
+//		ccmm - https://www.foxhollow.cc/projects/ccmm/
 //
 //	 go-import-media, aka gim, is a tool for automatically importing media
 //	 from removable disks into a predefined folder structure automatically.
@@ -23,9 +23,37 @@
 package main
 
 import (
-	"ccmm/importer/cmd"
+	"ccmm/model"
+	"ccmm/util"
+	"log/slog"
+	"os"
 )
 
 func main() {
-	cmd.Execute()
+	config := loadConfig()
+
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.Level(config.LogLevel),
+	}))
+	slog.SetDefault(logger)
+
+	if config.ForceReadOnly {
+		logger = logger.With(slog.Bool("DryRun", config.ForceReadOnly))
+		slog.SetDefault(logger)
+
+		slog.Info("Force dry run is ENABLED via config")
+	}
+
+	slog.Info("Configured data directory: " + config.DataDir)
+
+	// TODO: add config entries to enable/disable gim server
+	// TODO: add config entries to enable/disable localsend server
+}
+
+func loadConfig() model.ManagerConfig {
+	config := model.DefaultManagerConfig
+
+	util.ReadConfig(&config, true, false)
+
+	return config
 }

@@ -1,6 +1,6 @@
 // =================================================================================
 //
-//		gim - https://www.foxhollow.cc/projects/gim/
+//		ccmm - https://www.foxhollow.cc/projects/ccmm/
 //
 //	 go-import-media, aka gim, is a tool for automatically importing media
 //	 from removable disks into a predefined folder structure automatically.
@@ -22,9 +22,12 @@
 // =================================================================================
 package model
 
-var Config ConfigModel
+// Global configuration object
+//
+// Deprecated: globals need to die
+var Config ImporterConfig
 
-type ConfigModel struct {
+type ImporterConfig struct {
 	LiveDataDir           string          `yaml:"live_data_dir"`
 	LogLevel              int8            `yaml:"log_level"`
 	ListenAddress         string          `yaml:"listen_address"`
@@ -47,7 +50,7 @@ type LocalSendConfig struct {
 	RequirePassword     string   `yaml:"require_password"`
 }
 
-var DefaultConfig = ConfigModel{
+var DefaultImporterConfig = ImporterConfig{
 	LiveDataDir:           "./uploads",
 	LogLevel:              0,
 	ListenAddress:         "127.0.0.1",
@@ -66,4 +69,20 @@ var DefaultConfig = ConfigModel{
 		AllowedAliases:      []string{"__ALL__"},
 		RequirePassword:     "",
 	},
+}
+
+type ManagerConfig struct {
+	DataDir       string `yaml:"data_dir"`
+	LogLevel      int8   `yaml:"log_level"`
+	ListenAddress string `yaml:"listen_address"`
+	ListenPort    int32  `yaml:"listen_port"`
+	ForceReadOnly bool   `yaml:"force_read_only"`
+}
+
+var DefaultManagerConfig = ManagerConfig{
+	DataDir:       "./uploads",
+	LogLevel:      -4,
+	ListenAddress: "0.0.0.0",
+	ListenPort:    7280,
+	ForceReadOnly: false,
 }
