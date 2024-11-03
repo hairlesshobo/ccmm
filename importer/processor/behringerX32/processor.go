@@ -132,6 +132,11 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 
 				stat, _ := os.Stat(fullPath)
 
+				if stat.Size() == 0 {
+					logger.Info(fmt.Sprintf("[scanDirectory]: Skipping 0 byte file '%s'", fullPath))
+					continue
+				}
+
 				var newFile model.SourceFile
 				newFile.FileName = entry.Name()
 				newFile.SourcePath = fullPath
