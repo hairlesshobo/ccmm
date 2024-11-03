@@ -26,7 +26,8 @@
 
 # The directory to which auto-imported media should be copied
 #   default: ./uploads/
-data_dir: /home/flip/test
+data_dirs: 
+  services: /Volumes/CC-Services
 
 # Log levels:
 #   -4 DEBUG

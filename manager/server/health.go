@@ -20,43 +20,15 @@
 //		limitations under the License.
 //
 // =================================================================================
-package main
+package server
 
-import (
-	"ccmm/manager/server"
-	"ccmm/model"
-	"ccmm/util"
-	"log/slog"
-	"os"
-)
+import "net/http"
 
-func main() {
-	config := loadConfig()
+//
+// private functions
+//
 
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.Level(config.LogLevel),
-	}))
-	slog.SetDefault(logger)
-
-	if config.ForceReadOnly {
-		logger = logger.With(slog.Bool("DryRun", config.ForceReadOnly))
-		slog.SetDefault(logger)
-
-		slog.Info("Force dry run is ENABLED via config")
-	}
-
-	slog.Info("Configured services data directory: " + config.DataDirs.Services)
-
-	server.StartServer(config)
-
-	// TODO: add config entries to enable/disable gim server
-	// TODO: add config entries to enable/disable localsend server
-}
-
-func loadConfig() model.ManagerConfig {
-	config := model.DefaultManagerConfig
-
-	util.ReadConfig(&config, true, false)
-
-	return config
+func healthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	w.Write([]byte("OK"))
 }

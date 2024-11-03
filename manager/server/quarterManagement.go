@@ -20,43 +20,38 @@
 //		limitations under the License.
 //
 // =================================================================================
-package main
+package server
 
 import (
-	"ccmm/manager/server"
 	"ccmm/model"
-	"ccmm/util"
+	"encoding/json"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 )
 
-func main() {
-	config := loadConfig()
+//
+// private functions
+//
 
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.Level(config.LogLevel),
-	}))
-	slog.SetDefault(logger)
+func getQuarters(config model.ManagerConfig, w http.ResponseWriter, r *http.Request) {
+	entries, err := os.ReadDir(config.DataDirs.Services)
 
-	if config.ForceReadOnly {
-		logger = logger.With(slog.Bool("DryRun", config.ForceReadOnly))
-		slog.SetDefault(logger)
-
-		slog.Info("Force dry run is ENABLED via config")
+	if err != nil {
+		slog.Error(fmt.Sprintf("failed to read serice directory: %s", err.Error()))
+		http.Error(w, "failed to read serices directory", http.StatusInternalServerError)
+		return
 	}
 
-	slog.Info("Configured services data directory: " + config.DataDirs.Services)
+	fmt.Printf("%+v\n", entries)
+	res, err := json.Marshal(entries)
+	if err != nil {
+		slog.Error(fmt.Sprintf("json convert failed: %s", err.Error()))
+		http.Error(w, "json convert failed", http.StatusInternalServerError)
+		return
+	}
 
-	server.StartServer(config)
-
-	// TODO: add config entries to enable/disable gim server
-	// TODO: add config entries to enable/disable localsend server
-}
-
-func loadConfig() model.ManagerConfig {
-	config := model.DefaultManagerConfig
-
-	util.ReadConfig(&config, true, false)
-
-	return config
+	w.WriteHeader(200)
+	w.Write(res)
 }

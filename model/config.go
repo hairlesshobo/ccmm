@@ -72,15 +72,21 @@ var DefaultImporterConfig = ImporterConfig{
 }
 
 type ManagerConfig struct {
-	DataDir       string `yaml:"data_dir"`
-	LogLevel      int8   `yaml:"log_level"`
-	ListenAddress string `yaml:"listen_address"`
-	ListenPort    int32  `yaml:"listen_port"`
-	ForceReadOnly bool   `yaml:"force_read_only"`
+	DataDirs      ManagerDataDirs `yaml:"data_dirs"`
+	LogLevel      int8            `yaml:"log_level"`
+	ListenAddress string          `yaml:"listen_address"`
+	ListenPort    int32           `yaml:"listen_port"`
+	ForceReadOnly bool            `yaml:"force_read_only"`
+}
+
+type ManagerDataDirs struct {
+	Services string `yaml:"services"`
 }
 
 var DefaultManagerConfig = ManagerConfig{
-	DataDir:       "./uploads",
+	DataDirs: ManagerDataDirs{
+		Services: "./services/",
+	},
 	LogLevel:      -4,
 	ListenAddress: "0.0.0.0",
 	ListenPort:    7280,
