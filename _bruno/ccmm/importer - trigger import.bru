@@ -1,0 +1,22 @@
+meta {
+  name: importer - trigger import
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:7273/trigger_import
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "volume_path": "/Volumes/CANON",
+    "eject_on_complete": false,
+    "empty_on_complete": false,
+    "device_path": null,
+    "device_id": null,
+    "dry_run": true
+  }
+}
