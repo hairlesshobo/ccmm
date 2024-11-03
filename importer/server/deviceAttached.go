@@ -79,6 +79,7 @@ func triggerDeviceAttached(w http.ResponseWriter, r *http.Request) {
 	if !util.FileExists(attachDeviceConfig.DevicePath) {
 		w.WriteHeader(500)
 	} else {
+		// TODO: how to make this non-blocking and add to a queue to work off of
 		deviceAttacherQueueChan <- attachDeviceConfig
 		w.WriteHeader(201)
 	}
