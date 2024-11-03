@@ -28,15 +28,15 @@ import (
 	"path"
 	"path/filepath"
 
-	"ccmm/model"
-
 	"gopkg.in/yaml.v2"
 )
 
 func ReadConfig(cfg interface{}, readYaml bool, readEnv bool) {
 	if readYaml {
-		readFile(&model.Config)
+		readFile(cfg)
 	}
+
+	// TODO: re-add support for reading from environment variables
 }
 
 func processError(err error) {
