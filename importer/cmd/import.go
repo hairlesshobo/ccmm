@@ -46,7 +46,7 @@ var (
 		Long:  `This will allow you to perform an import on a single volume in interactive mode`,
 		Args:  cobra.MinimumNArgs(1),
 
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, args []string) {
 			var importConfig model.ImportVolume
 			importConfig.DryRun = importArg_dryRun || model.Config.ForceDryRun
 			importConfig.VolumePath = args[0]
@@ -55,7 +55,7 @@ var (
 			slog.Debug(fmt.Sprintf("%+v", importConfig))
 
 			if importArg_individual {
-				action.Import(importConfig)
+				action.Import(importConfig, func(_ *action.ImportQueueItem) {})
 			} else {
 				// queue the import with the server intance
 				uri := fmt.Sprintf("http://%s/trigger_import", importArg_server)

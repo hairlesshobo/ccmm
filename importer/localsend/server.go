@@ -67,6 +67,8 @@ func RunServer(config model.LocalSendConfig, sessionCompleteCallback func(string
 	go func() {
 		slog.Info(fmt.Sprintf("Started localsend server '%s' on %s:%d", config.Alias, config.ListenAddress, config.ListenPort))
 
+		// TODO: log the configure upload directory
+
 		if err := http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddress, config.ListenPort), httpServer); err != nil {
 			slog.Error(fmt.Sprintf("Localsend Server '%s' failed: %v", config.Alias, err))
 			return

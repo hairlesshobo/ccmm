@@ -46,7 +46,7 @@ var (
 
 func initDeviceAttachedThread() {
 	shutdownDeviceAttacherChan = make(chan struct{})
-	deviceAttacherQueueChan = make(chan model.DeviceAttached)
+	deviceAttacherQueueChan = make(chan model.DeviceAttached, 10)
 
 	go deviceAttachedRoutine(deviceAttacherQueueChan, shutdownDeviceAttacherChan)
 }
@@ -56,7 +56,7 @@ func cleanupDeviceAttachedThread() {
 	defer close(deviceAttacherQueueChan)
 }
 
-func triggerDeviceAttached(w http.ResponseWriter, r *http.Request) {
+func deviceAttachedPost(w http.ResponseWriter, r *http.Request) {
 	if model.Config.DisableAutoProcessing {
 		slog.Info("Auto processing is disabled by config file, taking no action")
 		w.WriteHeader(403)
@@ -79,7 +79,6 @@ func triggerDeviceAttached(w http.ResponseWriter, r *http.Request) {
 	if !util.FileExists(attachDeviceConfig.DevicePath) {
 		w.WriteHeader(500)
 	} else {
-		// TODO: how to make this non-blocking and add to a queue to work off of
 		deviceAttacherQueueChan <- attachDeviceConfig
 		w.WriteHeader(201)
 	}
@@ -101,9 +100,6 @@ out:
 			fmt.Printf("%+v\n", attachDeviceConfig)
 			action.DeviceAttached(attachDeviceConfig)
 		default:
-			// TODO: is this block even necessary?
-			// continue processing here
-			// // Queue draw
 		}
 
 		time.Sleep(200 * time.Millisecond)

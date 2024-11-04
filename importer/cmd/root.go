@@ -26,6 +26,7 @@ import (
 	"log/slog"
 	"os"
 
+	"ccmm/importer/action"
 	"ccmm/model"
 	"ccmm/util"
 
@@ -72,6 +73,14 @@ func init() {
 	}
 
 	slog.Info("Configured data directory: " + model.Config.LiveDataDir)
+
+	// This starts the thread that actually processes the import queue
+	// TODO: need to add a shutdown channel for clean termination
+	// var (
+	// shutdownChan    chan struct{}
+	// )
+	// shutdownChan = make(chan struct{})
+	go action.ImportWorker()
 
 	// TODO: add config entries to enable/disable gim server
 	// TODO: add config entries to enable/disable localsend server

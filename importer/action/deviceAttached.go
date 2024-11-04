@@ -32,36 +32,35 @@ import (
 )
 
 var (
-	unmountRetries          int = 5
-	unmountRetryWaitSeconds int = 5
+	unmountRetries          = 5
+	unmountRetryWaitSeconds = 5
 )
 
-func DeviceAttached(params model.DeviceAttached) bool {
+func DeviceAttached(params model.DeviceAttached) {
 	slog.Info(fmt.Sprintf("Handle device attachment for '%s'", params.DevicePath))
 
+	// TODO: add mount retries
 	mountedPath := util.MountVolume(params.DevicePath)
 
 	var importConfig model.ImportVolume
 	importConfig.DryRun = params.DryRun
 	importConfig.VolumePath = mountedPath
 
-	Import(importConfig)
+	Import(importConfig, func(_ *ImportQueueItem) {
+		// TODO: do empty, if enabled
 
-	// TODO: do empty, if enabled
+		for i := 1; i <= unmountRetries; i++ {
+			success := util.UnmountVolume(params.DevicePath)
+			if success {
+				break
+			}
 
-	for i := 1; i <= unmountRetries; i++ {
-		success := util.UnmountVolume(params.DevicePath)
-		if success {
-			break
+			slog.Info(fmt.Sprintf("Failed to unmount device '%s', waiting %d seconds and trying again [attempt %d/%d",
+				params.DevicePath, unmountRetryWaitSeconds, i, unmountRetries))
+			time.Sleep(time.Duration(unmountRetryWaitSeconds) * time.Second)
 		}
+		util.PowerOffDevice(params.DevicePath)
 
-		slog.Info(fmt.Sprintf("Failed to unmount device '%s', waiting %d seconds and trying again [attempt %d/%d",
-			params.DevicePath, unmountRetryWaitSeconds, i, unmountRetries))
-		time.Sleep(time.Duration(unmountRetryWaitSeconds) * time.Second)
-	}
-	util.PowerOffDevice(params.DevicePath)
-
-	slog.Info(fmt.Sprintf("Finished device attachment for '%s'", params.DevicePath))
-
-	return true
+		slog.Info(fmt.Sprintf("Finished device attachment for '%s'", params.DevicePath))
+	})
 }

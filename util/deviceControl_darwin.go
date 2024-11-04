@@ -25,7 +25,7 @@
 package util
 
 import (
-	"path"
+	"path/filepath"
 )
 
 func TestPlatform() {
@@ -33,7 +33,7 @@ func TestPlatform() {
 }
 
 func GetVolumeName(mountPath string) string {
-	_, label := path.Split(mountPath)
+	label := filepath.Base(mountPath)
 	return label
 }
 

@@ -107,21 +107,24 @@ func FindProcessors(volumePath string) []Processor {
 	return foundProcessors
 }
 
-func ProcessSources(processors []Processor, dryRun bool, dump bool) {
-	for _, processor := range processors {
-		ProcessSource(processor, dryRun, dump)
-	}
-}
+func EnumerateSources(processors []Processor, dump bool) []model.SourceFile {
+	var allFiles []model.SourceFile
 
-func ProcessSource(processor Processor, dryRun bool, dump bool) {
-	files := processor.EnumerateFiles()
+	for _, processor := range processors {
+		processorFiles := processor.EnumerateFiles()
+
+		allFiles = append(allFiles, processorFiles...)
+	}
 
 	if dump {
-		j, _ := json.MarshalIndent(files, "", "  ")
+		j, _ := json.MarshalIndent(allFiles, "", "  ")
 		fmt.Println(string(j))
-		return
 	}
 
+	return allFiles
+}
+
+func ImportFiles(files []model.SourceFile, dryRun bool) {
 	for _, sourceFile := range files {
 		destDir := util.GetDestinationDirectory(model.Config.LiveDataDir, sourceFile)
 		destPath := path.Join(destDir, sourceFile.FileName)
@@ -151,6 +154,7 @@ func ProcessSource(processor Processor, dryRun bool, dump bool) {
 			slog.Info(fmt.Sprintf("[Dry run] Would copy '%s' to '%s'", sourceFile.SourcePath, destPath))
 		} else {
 			slog.Info(fmt.Sprintf("Copying '%s' to '%s'", sourceFile.SourcePath, destPath))
+			// TODO: find a way to add transfer speeds to this
 			util.CopyFile(sourceFile.SourcePath, destPath)
 		}
 
