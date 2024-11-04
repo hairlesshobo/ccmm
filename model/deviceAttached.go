@@ -20,6 +20,7 @@
 //		limitations under the License.
 //
 // =================================================================================
+
 package model
 
 type DeviceAttached struct {

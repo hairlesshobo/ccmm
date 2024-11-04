@@ -20,6 +20,7 @@
 //		limitations under the License.
 //
 // =================================================================================
+
 package cmd
 
 import (
@@ -35,10 +36,10 @@ import (
 )
 
 var (
-	importArg_individual bool
-	importArg_dryRun     bool
-	importArg_server     string
-	importArg_dump       bool
+	importArgIndividual bool
+	importArgDryRun     bool
+	importArgServer     string
+	importArgDump       bool
 
 	importCmd = &cobra.Command{
 		Use:   "import [flags] volume_path",
@@ -48,17 +49,17 @@ var (
 
 		Run: func(_ *cobra.Command, args []string) {
 			var importConfig model.ImportVolume
-			importConfig.DryRun = importArg_dryRun || model.Config.ForceDryRun
+			importConfig.DryRun = importArgDryRun || model.Config.ForceDryRun
 			importConfig.VolumePath = args[0]
-			importConfig.Dump = importArg_dump
+			importConfig.Dump = importArgDump
 
 			slog.Debug(fmt.Sprintf("%+v", importConfig))
 
-			if importArg_individual {
+			if importArgIndividual {
 				action.Import(importConfig, func(_ *action.ImportQueueItem) {})
 			} else {
 				// queue the import with the server intance
-				uri := fmt.Sprintf("http://%s/trigger_import", importArg_server)
+				uri := fmt.Sprintf("http://%s/trigger_import", importArgServer)
 				_, statusCode := util.CallServer(uri, importConfig)
 
 				if statusCode != 201 {
@@ -71,10 +72,10 @@ var (
 )
 
 func init() {
-	importCmd.Flags().BoolVarP(&importArg_individual, "individual", "i", false, "Run a single import without connecting to the running server")
-	importCmd.Flags().BoolVarP(&importArg_dryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
-	importCmd.Flags().BoolVarP(&importArg_dump, "dump", "d", false, "If set, dump the list of scanned files to json and exit (for debugging only)")
-	importCmd.Flags().StringVarP(&importArg_server, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
+	importCmd.Flags().BoolVarP(&importArgIndividual, "individual", "i", false, "Run a single import without connecting to the running server")
+	importCmd.Flags().BoolVarP(&importArgDryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
+	importCmd.Flags().BoolVarP(&importArgDump, "dump", "d", false, "If set, dump the list of scanned files to json and exit (for debugging only)")
+	importCmd.Flags().StringVarP(&importArgServer, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
 
 	rootCmd.AddCommand(importCmd)
 }

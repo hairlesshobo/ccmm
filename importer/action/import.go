@@ -20,6 +20,7 @@
 //		limitations under the License.
 //
 // =================================================================================
+
 package action
 
 import (
@@ -34,16 +35,27 @@ import (
 	"ccmm/util"
 )
 
+// ImportStatus Enum to describe the potential state of enums
 type ImportStatus int8
 
 const (
+	// Pending The import is currently pending and no action has been taken
 	Pending ImportStatus = iota
+
+	// Scanning The import process is currently scanning for supported processors and source files
 	Scanning
+
+	// Importing The import process is currently copying files from the source to the destination
 	Importing
+
+	// Completed The import process has completed
 	Completed
+
+	// Failed One or more errors occurred during the import process
 	Failed
 )
 
+// ImportQueueItem Structure that defines an import job
 type ImportQueueItem struct {
 	Params           model.ImportVolume
 	Processors       []processor.Processor
@@ -77,6 +89,7 @@ func getFirstQueueIndex(importQueue *map[int]*ImportQueueItem) int {
 	return -1
 }
 
+// ImportWorker Routine that runs and processes the import queue sequentially
 func ImportWorker() {
 	// TODO: add cancel channel
 	for {
@@ -103,6 +116,10 @@ func ImportWorker() {
 	}
 }
 
+// Import Add a new import job to the queue by providing the params
+// that describe the import job. Additionally, a finishedCallback should
+// be provided and will be executed upon completion of the import job
+// (regardless of a successful or failed import)
 func Import(params model.ImportVolume, finishedCallback func(queueItem *ImportQueueItem)) {
 	if !util.DirectoryExists(params.VolumePath) {
 		slog.Error(fmt.Sprintf("Cannot import because directory not found: %s", params.VolumePath))

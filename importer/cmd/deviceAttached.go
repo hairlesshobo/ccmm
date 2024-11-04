@@ -20,6 +20,7 @@
 //		limitations under the License.
 //
 // =================================================================================
+
 package cmd
 
 import (
@@ -35,11 +36,11 @@ import (
 )
 
 var (
-	deviceAttached_individual bool
-	deviceAttached_dryRun     bool
-	deviceAttached_server     string
-	deviceAttached_noUnmount  bool
-	deviceAttached_noPoweroff bool
+	deviceAttachedIndividual bool
+	deviceAttachedDryRun     bool
+	deviceAttachedServer     string
+	deviceAttachedNoUnmount  bool
+	deviceAttachedNoPoweroff bool
 
 	deviceAttachedCmd = &cobra.Command{
 		Use:   "device_attached [flags] device_path",
@@ -47,20 +48,20 @@ var (
 		Long:  `This is the fully automatic import process that can be triggered by udev to mount, import, unmount and power down an attached device.`,
 		Args:  cobra.MinimumNArgs(1),
 
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, args []string) {
 			var deviceAttachedConfig model.DeviceAttached
-			deviceAttachedConfig.DryRun = deviceAttached_dryRun || model.Config.ForceDryRun
+			deviceAttachedConfig.DryRun = deviceAttachedDryRun || model.Config.ForceDryRun
 			deviceAttachedConfig.DevicePath = args[0]
-			deviceAttachedConfig.NoUnmount = deviceAttached_noUnmount
-			deviceAttachedConfig.NoPoweroff = deviceAttached_noPoweroff
+			deviceAttachedConfig.NoUnmount = deviceAttachedNoUnmount
+			deviceAttachedConfig.NoPoweroff = deviceAttachedNoPoweroff
 
 			slog.Debug(fmt.Sprintf("%+v", deviceAttachedConfig))
 
-			if deviceAttached_individual {
+			if deviceAttachedIndividual {
 				action.DeviceAttached(deviceAttachedConfig)
 			} else {
 				// queue the import with the server intance
-				uri := fmt.Sprintf("http://%s/device_attached", deviceAttached_server)
+				uri := fmt.Sprintf("http://%s/device_attached", deviceAttachedServer)
 				_, statusCode := util.CallServer(uri, deviceAttachedConfig)
 
 				if statusCode != 201 {
@@ -73,11 +74,11 @@ var (
 )
 
 func init() {
-	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_individual, "individual", "i", false, "Run a single import without connecting to the running server")
-	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_dryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
-	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_noUnmount, "no_unmount", "u", false, "Prevents the job from automatically unmounting the device when finished processing")
-	deviceAttachedCmd.Flags().BoolVarP(&deviceAttached_noPoweroff, "no_poweroff", "p", false, "Prevents thje job from automatically powering off the device when finished processing")
-	deviceAttachedCmd.Flags().StringVarP(&deviceAttached_server, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
+	deviceAttachedCmd.Flags().BoolVarP(&deviceAttachedIndividual, "individual", "i", false, "Run a single import without connecting to the running server")
+	deviceAttachedCmd.Flags().BoolVarP(&deviceAttachedDryRun, "dry_run", "n", false, "Perform a dry-run import (don't copy anything)")
+	deviceAttachedCmd.Flags().BoolVarP(&deviceAttachedNoUnmount, "no_unmount", "u", false, "Prevents the job from automatically unmounting the device when finished processing")
+	deviceAttachedCmd.Flags().BoolVarP(&deviceAttachedNoPoweroff, "no_poweroff", "p", false, "Prevents thje job from automatically powering off the device when finished processing")
+	deviceAttachedCmd.Flags().StringVarP(&deviceAttachedServer, "server", "s", "localhost:7273", "<host>:<port> -- If specified, connect to the specified server instance to queue an import")
 
 	rootCmd.AddCommand(deviceAttachedCmd)
 }

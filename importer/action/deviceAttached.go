@@ -20,6 +20,7 @@
 //		limitations under the License.
 //
 // =================================================================================
+
 package action
 
 import (
@@ -36,6 +37,8 @@ var (
 	unmountRetryWaitSeconds = 5
 )
 
+// DeviceAttached Perform the woek necessary for a newly attached device. This
+// will automaticlly mount the device, call an import, then unmount and power off the device
 func DeviceAttached(params model.DeviceAttached) {
 	slog.Info(fmt.Sprintf("Handle device attachment for '%s'", params.DevicePath))
 
