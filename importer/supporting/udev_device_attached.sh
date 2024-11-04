@@ -25,10 +25,10 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BIN_PATH=""
 
-if [ -f $SCRIPT_DIR/gim ]; then
-    BIN_PATH="$SCRIPT_DIR/gim"
-elif [ -f $SCRIPT_DIR/../gim ]; then
-    BIN_PATH="$SCRIPT_DIR/../gim"
+if [ -f $SCRIPT_DIR/importer ]; then
+    BIN_PATH="$SCRIPT_DIR/importer"
+elif [ -f $SCRIPT_DIR/../importer ]; then
+    BIN_PATH="$SCRIPT_DIR/../importer"
 fi
 
 BIN_PATH=$(readlink -f $BIN_PATH)

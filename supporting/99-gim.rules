@@ -1,2 +1,0 @@
-ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]1", RUN+="__INSTALL_PATH__/supporting/udev_device_attached.sh $env{DEVNAME}"
-#ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]1", RUN+="/usr/bin/su - -c '__INSTALL_PATH__/gim device_attached -n $env{DEVNAME}' __INSTALL_USER__"

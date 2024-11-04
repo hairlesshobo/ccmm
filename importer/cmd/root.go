@@ -62,18 +62,18 @@ func init() {
 	model.Config = config
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.Level(model.Config.LogLevel),
+		Level: slog.Level(config.LogLevel),
 	}))
 	slog.SetDefault(logger)
 
-	if model.Config.ForceDryRun {
-		logger = logger.With(slog.Bool("DryRun", model.Config.ForceDryRun))
+	if config.ForceDryRun {
+		logger = logger.With(slog.Bool("DryRun", config.ForceDryRun))
 		slog.SetDefault(logger)
 
 		slog.Info("Force dry run is ENABLED via config")
 	}
 
-	slog.Info("Configured data directory: " + model.Config.LiveDataDir)
+	slog.Info("Configured data directory: " + config.LiveDataDir)
 
 	// This starts the thread that actually processes the import queue
 	// TODO: need to add a shutdown channel for clean termination

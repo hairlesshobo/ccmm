@@ -26,18 +26,31 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 cd $SCRIPT_DIR
 
-# for local dev purposes, protect the config file
-if [ -f ./dist/config.yml ]; then
-    mv ./dist/config.yml ./config.dist.safe.yml
+# for local dev purposes, protect the config files
+if [ -f ./dist/importer/config.yml ]; then
+    echo "Preserving existing importer config"
+    mv ./dist/importer/config.yml ./config.importer.safe.yml
 fi
 
-rm -fr ./dist
-mkdir -p ./dist/supporting
-go build -o ./dist gim.go
-cp -r ./supporting/* ./dist/supporting/
-mv ./dist/supporting/install.sh ./dist/
-cp ./config.yml ./dist/config.example.yml
+if [ -d ./dist ]; then
+    echo "Removing existing build"
+    rm -fr ./dist
+fi
 
-if [ -f ./config.dist.safe.yml ]; then
-    mv ./config.dist.safe.yml ./dist/config.yml
+echo "Creating new build directories"
+mkdir -p ./dist/importer/supporting
+mkdir -p ./dist/manager
+mkdir -p ./dist/client
+
+echo "Building importer..."
+go build -o ./dist/importer/ importer/importer.go
+
+echo "Copying importer supporting files"
+cp -r ./importer/supporting/* ./dist/importer/supporting/
+mv ./dist/importer/supporting/install.sh ./dist/importer/
+cp ./importer/config.yml ./dist/importer/config.example.yml
+
+if [ -f ./config.importer.safe.yml ]; then
+    echo "Recovering existing importer config"
+    mv ./config.importer.safe.yml ./dist/importer/config.yml
 fi
