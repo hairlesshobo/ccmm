@@ -91,7 +91,7 @@ func loadConfig() model.ImporterConfig {
 	config := model.DefaultImporterConfig
 	config.LocalSend.Alias = util.GetHostname()
 
-	util.ReadConfig(&config, true, false)
+	util.ReadConfig(&config, true, false, "importer.yml")
 
 	return config
 }

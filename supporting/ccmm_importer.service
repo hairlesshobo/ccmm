@@ -3,7 +3,7 @@ Description=ccmm_importer
 After=multi-user.target
 
 [Service]
-ExecStart=__INSTALL_PATH__/importer/importer server
+ExecStart=__INSTALL_PATH__/importer server
 Type=simple
 User=__INSTALL_USER__
 Group=__INSTALL_GROUP__

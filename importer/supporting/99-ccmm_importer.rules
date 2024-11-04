@@ -1,1 +1,0 @@
-ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z][1-9]", ENV{ID_FS_LABEL}!="EFI", RUN+="__INSTALL_PATH__/importer/supporting/udev_device_attached.sh $env{DEVNAME}"

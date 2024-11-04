@@ -32,9 +32,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func ReadConfig(cfg interface{}, readYaml bool, readEnv bool) {
+func ReadConfig(cfg interface{}, readYaml bool, readEnv bool, configFileName string) {
 	if readYaml {
-		readFile(cfg)
+		readFile(cfg, configFileName)
 	}
 
 	// TODO: re-add support for reading from environment variables
@@ -45,7 +45,7 @@ func processError(err error) {
 	os.Exit(2)
 }
 
-func readFile(cfg interface{}) {
+func readFile(cfg interface{}, configFileName string) {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
 	configPath := os.Getenv("CONFIG_FILE")
@@ -53,13 +53,13 @@ func readFile(cfg interface{}) {
 	if configPath == "" {
 		binPath, _ := os.Executable()
 		binDir := filepath.Dir(binPath)
-		sidecarPath := path.Join(binDir, "config.yml")
+		sidecarPath := path.Join(binDir, configFileName)
 
 		if FileExists(sidecarPath) {
 			configPath = sidecarPath
 		} else {
 			homeDir, _ := os.UserHomeDir()
-			homeDotConfigPath := path.Join(homeDir, ".config", "gim.yml")
+			homeDotConfigPath := path.Join(homeDir, ".config", "ccmm", configFileName)
 
 			if FileExists(homeDotConfigPath) {
 				configPath = homeDotConfigPath

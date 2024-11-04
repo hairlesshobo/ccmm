@@ -57,7 +57,7 @@ func main() {
 func loadConfig() model.ManagerConfig {
 	config := model.DefaultManagerConfig
 
-	util.ReadConfig(&config, true, false)
+	util.ReadConfig(&config, true, false, "manager.yml")
 
 	return config
 }
