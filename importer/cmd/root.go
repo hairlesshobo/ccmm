@@ -83,7 +83,7 @@ func init() {
 	// shutdownChan = make(chan struct{})
 	go action.ImportWorker()
 
-	// TODO: add config entries to enable/disable gim server
+	// TODO: add config entries to enable/disable importer server
 	// TODO: add config entries to enable/disable localsend server
 }
 

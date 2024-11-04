@@ -50,7 +50,7 @@ func main() {
 
 	server.StartServer(config)
 
-	// TODO: add config entries to enable/disable gim server
+	// TODO: add config entries to enable/disable importer server
 	// TODO: add config entries to enable/disable localsend server
 }
 
