@@ -55,6 +55,11 @@ func DeviceAttached(config model.ImporterConfig, params model.DeviceAttached) {
 		time.Sleep(time.Duration(mountRetryWaitSeconds) * time.Second)
 	}
 
+	if mountedPath == "" {
+		slog.Error(fmt.Sprintf("Failed to mount device %s", params.DevicePath))
+		return
+	}
+
 	var importConfig model.ImportVolume
 	importConfig.DryRun = params.DryRun
 	importConfig.VolumePath = mountedPath
