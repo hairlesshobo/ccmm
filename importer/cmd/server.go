@@ -36,8 +36,8 @@ import (
 )
 
 var (
-	server_listenAddress string
-	server_listenPort    int32
+	serverListenAddress string
+	serverListenPort    int32
 
 	serverCmd = &cobra.Command{
 		Use:   "server",
@@ -46,8 +46,10 @@ var (
     waits for media inserted notifications and clients which are to be invoked by 
     udev or other integrations to notify the server when media has been inserted.`,
 
-		Run: func(cmd *cobra.Command, args []string) {
-			go localsend.RunServer(model.Config.LocalSend, func(outputDir string) {
+		Run: func(cmd *cobra.Command, _ []string) {
+			config := cmd.Context().Value(model.ImportConfigContext).(model.ImporterConfig)
+
+			go localsend.RunServer(config.LocalSend, func(outputDir string) {
 				slog.Info(fmt.Sprintf("Triggering import of '%s' directory", outputDir))
 
 				var importConfig model.ImportVolume
@@ -56,7 +58,7 @@ var (
 				// queue the import with the server intance
 				// TODO: should be able to provide remote server address here in case i
 				// TODO: want to split localsend and import functionality between two systems
-				uri := fmt.Sprintf("http://%s:%d/trigger_import", model.Config.ListenAddress, model.Config.ListenPort)
+				uri := fmt.Sprintf("http://%s:%d/trigger_import", config.ListenAddress, config.ListenPort)
 				_, statusCode := util.CallServer(uri, importConfig)
 
 				if statusCode != 201 {
@@ -64,14 +66,14 @@ var (
 					os.Exit(1)
 				}
 			})
-			server.StartServer(server_listenAddress, server_listenPort)
+			server.StartServer(config, serverListenAddress, serverListenPort)
 		},
 	}
 )
 
 func init() {
-	serverCmd.Flags().StringVarP(&server_listenAddress, "listen", "l", model.Config.ListenAddress, "Local IP address to listen on")
-	serverCmd.Flags().Int32VarP(&server_listenPort, "port", "p", model.Config.ListenPort, "Port to start the HTTP REST server on")
+	serverCmd.Flags().StringVarP(&serverListenAddress, "listen", "l", model.DefaultImporterConfig.ListenAddress, "Local IP address to listen on")
+	serverCmd.Flags().Int32VarP(&serverListenPort, "port", "p", model.DefaultImporterConfig.ListenPort, "Port to start the HTTP REST server on")
 
 	rootCmd.AddCommand(serverCmd)
 }

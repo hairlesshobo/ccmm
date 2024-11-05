@@ -45,11 +45,11 @@ var (
 // private functions
 //
 
-func initDeviceAttachedThread() {
+func initDeviceAttachedThread(config model.ImporterConfig) {
 	shutdownDeviceAttacherChan = make(chan struct{})
 	deviceAttacherQueueChan = make(chan model.DeviceAttached, 10)
 
-	go deviceAttachedRoutine(deviceAttacherQueueChan, shutdownDeviceAttacherChan)
+	go deviceAttachedRoutine(config, deviceAttacherQueueChan, shutdownDeviceAttacherChan)
 }
 
 func cleanupDeviceAttachedThread() {
@@ -57,8 +57,8 @@ func cleanupDeviceAttachedThread() {
 	defer close(deviceAttacherQueueChan)
 }
 
-func deviceAttachedPost(w http.ResponseWriter, r *http.Request) {
-	if model.Config.DisableAutoProcessing {
+func deviceAttachedPost(config model.ImporterConfig, w http.ResponseWriter, r *http.Request) {
+	if config.DisableAutoProcessing {
 		slog.Info("Auto processing is disabled by config file, taking no action")
 		w.WriteHeader(403)
 		return
@@ -86,7 +86,7 @@ func deviceAttachedPost(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func deviceAttachedRoutine(deviceAttachedQueueChan chan model.DeviceAttached, shutdownDeviceAttachedChan chan struct{}) {
+func deviceAttachedRoutine(config model.ImporterConfig, deviceAttachedQueueChan chan model.DeviceAttached, shutdownDeviceAttachedChan chan struct{}) {
 out:
 	for {
 		select {
@@ -99,7 +99,7 @@ out:
 		case attachDeviceConfig := <-deviceAttachedQueueChan:
 			slog.Info("Starting device attached job for " + attachDeviceConfig.DevicePath)
 			fmt.Printf("%+v\n", attachDeviceConfig)
-			action.DeviceAttached(attachDeviceConfig)
+			action.DeviceAttached(config, attachDeviceConfig)
 		default:
 		}
 

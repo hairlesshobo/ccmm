@@ -23,10 +23,11 @@
 
 package model
 
-// Global configuration object
-//
-// Deprecated: globals need to die
-var Config ImporterConfig
+type ContextType string
+
+const (
+	ImportConfigContext ContextType = "importConfig"
+)
 
 type ImporterConfig struct {
 	LiveDataDir           string          `yaml:"live_data_dir"`

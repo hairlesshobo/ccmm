@@ -39,7 +39,7 @@ var (
 
 // DeviceAttached Perform the woek necessary for a newly attached device. This
 // will automaticlly mount the device, call an import, then unmount and power off the device
-func DeviceAttached(params model.DeviceAttached) {
+func DeviceAttached(config model.ImporterConfig, params model.DeviceAttached) {
 	slog.Info(fmt.Sprintf("Handle device attachment for '%s'", params.DevicePath))
 
 	// TODO: add mount retries
@@ -49,7 +49,7 @@ func DeviceAttached(params model.DeviceAttached) {
 	importConfig.DryRun = params.DryRun
 	importConfig.VolumePath = mountedPath
 
-	Import(importConfig, func(_ *ImportQueueItem) {
+	Import(config, importConfig, func(_ *ImportQueueItem) {
 		// TODO: do empty, if enabled
 
 		for i := 1; i <= unmountRetries; i++ {

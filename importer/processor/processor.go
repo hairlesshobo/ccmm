@@ -48,11 +48,11 @@ type Processor interface {
 	EnumerateFiles() []model.SourceFile
 }
 
-func useProcessor(name string) bool {
-	return len(model.Config.EnabledProcessors) == 0 || slices.Contains(model.Config.EnabledProcessors, name)
+func useProcessor(config model.ImporterConfig, name string) bool {
+	return len(config.EnabledProcessors) == 0 || slices.Contains(config.EnabledProcessors, name)
 }
 
-func initProcessors(volumePath string) []Processor {
+func initProcessors(config model.ImporterConfig, volumePath string) []Processor {
 	processors := []Processor{}
 
 	// I hate this. it hurts me. this should be in a map that is referenced and
@@ -60,32 +60,32 @@ func initProcessors(volumePath string) []Processor {
 	// new and couldn't figure it out quickly in go land, so i decided to go this
 	// route for now. gross, but works.
 
-	if useProcessor("behringerX32") {
+	if useProcessor(config, "behringerX32") {
 		processors = append(processors, behringerX32.New(volumePath))
 	}
 
-	if useProcessor("blackmagicIOS") {
+	if useProcessor(config, "blackmagicIOS") {
 		processors = append(processors, blackmagicIOS.New(volumePath))
 	}
 
-	if useProcessor("canonEOS") {
+	if useProcessor(config, "canonEOS") {
 		processors = append(processors, canonEOS.New(volumePath))
 	}
 
-	if useProcessor("canonXA") {
+	if useProcessor(config, "canonXA") {
 		processors = append(processors, canonXA.New(volumePath))
 	}
 
-	if useProcessor("jackRecorder") {
+	if useProcessor(config, "jackRecorder") {
 		processors = append(processors, jackRecorder.New(volumePath))
 	}
 
 	return processors
 }
 
-func FindProcessors(volumePath string) []Processor {
+func FindProcessors(config model.ImporterConfig, volumePath string) []Processor {
 	slog.Info(fmt.Sprintf("processor.FindProcessors: Looking for processors to handle path '%s'", volumePath))
-	processors := initProcessors(volumePath)
+	processors := initProcessors(config, volumePath)
 	var foundProcessors []Processor
 
 	for _, processor := range processors {
@@ -125,9 +125,9 @@ func EnumerateSources(processors []Processor, dump bool) []model.SourceFile {
 	return allFiles
 }
 
-func ImportFiles(files []model.SourceFile, dryRun bool) {
+func ImportFiles(config model.ImporterConfig, files []model.SourceFile, dryRun bool) {
 	for _, sourceFile := range files {
-		destDir := util.GetDestinationDirectory(model.Config.LiveDataDir, sourceFile)
+		destDir := util.GetDestinationDirectory(config.LiveDataDir, sourceFile)
 		destPath := path.Join(destDir, sourceFile.FileName)
 
 		// Create the dir and parents, if needed

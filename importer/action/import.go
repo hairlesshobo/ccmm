@@ -120,7 +120,7 @@ func ImportWorker() {
 // that describe the import job. Additionally, a finishedCallback should
 // be provided and will be executed upon completion of the import job
 // (regardless of a successful or failed import)
-func Import(params model.ImportVolume, finishedCallback func(queueItem *ImportQueueItem)) {
+func Import(config model.ImporterConfig, params model.ImportVolume, finishedCallback func(queueItem *ImportQueueItem)) {
 	if !util.DirectoryExists(params.VolumePath) {
 		slog.Error(fmt.Sprintf("Cannot import because directory not found: %s", params.VolumePath))
 		return
@@ -139,7 +139,7 @@ func Import(params model.ImportVolume, finishedCallback func(queueItem *ImportQu
 	}
 	importMutex.Unlock()
 
-	processors := processor.FindProcessors(params.VolumePath)
+	processors := processor.FindProcessors(config, params.VolumePath)
 
 	importMutex.Lock()
 	importQueue[queueIndex].Status = Pending
@@ -157,7 +157,7 @@ func Import(params model.ImportVolume, finishedCallback func(queueItem *ImportQu
 		importMutex.Unlock()
 
 		// TODO: add some sort of status callback here
-		processor.ImportFiles(files, params.DryRun)
+		processor.ImportFiles(config, files, params.DryRun)
 
 		slog.Info(fmt.Sprintf("Finished import for volume '%s'", params.VolumePath))
 		queueItem.FinishedCallback(queueItem)

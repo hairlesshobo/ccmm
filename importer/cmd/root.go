@@ -24,6 +24,7 @@
 package cmd
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
@@ -38,28 +39,16 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "go-import-media",
+		Use:   "ccmm_importer",
 		Short: "media importer",
 		Long:  `Custom tool for identifying source media and importing to appropriate destination`,
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
-		// Run: func(cmd *cobra.Command, args []string) { },
 	}
 )
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
-
-	if err != nil {
-		os.Exit(1)
-	}
-}
-
-func init() {
 	config := loadConfig()
-	model.Config = config
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.Level(config.LogLevel),
@@ -85,6 +74,17 @@ func init() {
 
 	// TODO: add config entries to enable/disable importer server
 	// TODO: add config entries to enable/disable localsend server
+
+	ctx := context.WithValue(context.TODO(), model.ImportConfigContext, config)
+	err := rootCmd.ExecuteContext(ctx)
+
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func init() {
+
 }
 
 func loadConfig() model.ImporterConfig {

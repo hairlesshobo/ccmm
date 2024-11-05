@@ -48,9 +48,11 @@ var (
 		Long:  `This is the fully automatic import process that can be triggered by udev to mount, import, unmount and power down an attached device.`,
 		Args:  cobra.MinimumNArgs(1),
 
-		Run: func(_ *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, args []string) {
+			config := cmd.Context().Value(model.ImportConfigContext).(model.ImporterConfig)
+
 			var deviceAttachedConfig model.DeviceAttached
-			deviceAttachedConfig.DryRun = deviceAttachedDryRun || model.Config.ForceDryRun
+			deviceAttachedConfig.DryRun = deviceAttachedDryRun || config.ForceDryRun
 			deviceAttachedConfig.DevicePath = args[0]
 			deviceAttachedConfig.NoUnmount = deviceAttachedNoUnmount
 			deviceAttachedConfig.NoPoweroff = deviceAttachedNoPoweroff
@@ -58,7 +60,7 @@ var (
 			slog.Debug(fmt.Sprintf("%+v", deviceAttachedConfig))
 
 			if deviceAttachedIndividual {
-				action.DeviceAttached(deviceAttachedConfig)
+				action.DeviceAttached(config, deviceAttachedConfig)
 			} else {
 				// queue the import with the server intance
 				uri := fmt.Sprintf("http://%s/device_attached", deviceAttachedServer)

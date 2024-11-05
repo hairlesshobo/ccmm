@@ -39,10 +39,10 @@ import (
 // public functoins
 //
 
-func StartServer(listenAddress string, listenPort int32) {
-	initDeviceAttachedThread()
+func StartServer(config model.ImporterConfig, listenAddress string, listenPort int32) {
+	initDeviceAttachedThread(config)
 
-	startServer(listenAddress, listenPort, setupRouting())
+	startServer(listenAddress, listenPort, setupRouting(config))
 
 	cleanupDeviceAttachedThread()
 }
@@ -62,9 +62,9 @@ func startServer(listenAddress string, listenPort int32, router *chi.Mux) {
 	}
 }
 
-func getLogger() *httplog.Logger {
+func getLogger(config model.ImporterConfig) *httplog.Logger {
 	logger := httplog.NewLogger("server.listener", httplog.Options{
-		LogLevel:       slog.Level(model.Config.LogLevel),
+		LogLevel:       slog.Level(config.LogLevel),
 		Concise:        true,
 		RequestHeaders: false,
 	})
@@ -74,14 +74,18 @@ func getLogger() *httplog.Logger {
 	return logger
 }
 
-func setupRouting() *chi.Mux {
+func setupRouting(config model.ImporterConfig) *chi.Mux {
 	router := chi.NewRouter()
 
-	router.Use(httplog.RequestLogger(getLogger()))
+	router.Use(httplog.RequestLogger(getLogger(config)))
 
 	router.Get("/health", healthCheck)
-	router.Post("/trigger_import", importPost)
-	router.Post("/device_attached", deviceAttachedPost)
+	router.Post("/trigger_import", func(w http.ResponseWriter, r *http.Request) {
+		importPost(config, w, r)
+	})
+	router.Post("/device_attached", func(w http.ResponseWriter, r *http.Request) {
+		deviceAttachedPost(config, w, r)
+	})
 	// TODO: add /status route
 
 	return router

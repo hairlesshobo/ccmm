@@ -38,7 +38,7 @@ import (
 // private functions
 //
 
-func importPost(w http.ResponseWriter, r *http.Request) {
+func importPost(config model.ImporterConfig, w http.ResponseWriter, r *http.Request) {
 	var importConfig model.ImportVolume
 
 	body, err := io.ReadAll(r.Body)
@@ -50,12 +50,12 @@ func importPost(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to unmarshal JSON: " + err.Error())
 	}
 
-	importConfig.DryRun = importConfig.DryRun || model.Config.ForceDryRun
+	importConfig.DryRun = importConfig.DryRun || config.ForceDryRun
 
 	if !util.DirectoryExists(importConfig.VolumePath) {
 		w.WriteHeader(500)
 	} else {
-		action.Import(importConfig, func(_ *action.ImportQueueItem) {})
+		action.Import(config, importConfig, func(_ *action.ImportQueueItem) {})
 		w.WriteHeader(201)
 	}
 
