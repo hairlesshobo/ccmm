@@ -26,7 +26,7 @@
 
 # TODO: comment here
 data_dirs: 
-  services: /Volumes/CC-Services
+  services: /Users/flip/Studio/Connection Church/_Services
 
 # Log levels:
 #   -4 DEBUG
@@ -36,15 +36,10 @@ data_dirs:
 #  default: 0
 log_level: -4
 
-# When running in server mode (such as the systemd service), 
-# the local address to bind to
-#   default: 0.0.0.0
-listen_address: 0.0.0.0
+# The client name to use when connecting to the manager
+#   default: system hostname
+# client_name: 
 
-# local port to bind to when running as server
-#   default: 7280
-listen_port: 7280
-
-# if set, ALL data access will be restricted to read-only operations
-#   default: false
-force_read_only: false
+# The remote address of the manager instance to connect to
+#   default: http://localhost:7280
+manager_address: http://localhost:7280

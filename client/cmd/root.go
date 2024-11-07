@@ -28,7 +28,6 @@ import (
 	"log/slog"
 	"os"
 
-	"ccmm/importer/action"
 	"ccmm/model"
 	"ccmm/util"
 
@@ -39,9 +38,9 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "ccmm_importer",
-		Short: "media importer",
-		Long:  `Custom tool for identifying source media and importing to appropriate destination`,
+		Use:   "ccmm_client",
+		Short: "GUI client for interacting with CC Media Manager",
+		Long:  `The default behavior of this app, if ran without any command specified, is to execute the GUI client`,
 	}
 )
 
@@ -55,27 +54,8 @@ func Execute() {
 	}))
 	slog.SetDefault(logger)
 
-	if config.ForceDryRun {
-		logger = logger.With(slog.Bool("DryRun", config.ForceDryRun))
-		slog.SetDefault(logger)
-
-		slog.Info("Force dry run is ENABLED via config")
-	}
-
-	slog.Info("Configured data directory: " + config.LiveDataDir)
-
-	// This starts the thread that actually processes the import queue
-	// TODO: need to add a shutdown channel for clean termination
-	// var (
-	// shutdownChan    chan struct{}
-	// )
-	// shutdownChan = make(chan struct{})
-	go action.ImportWorker()
-
-	// TODO: add config entries to enable/disable importer server
-	// TODO: add config entries to enable/disable localsend server
-
-	ctx := context.WithValue(context.TODO(), model.ImportConfigContext, config)
+	// Add the config to the cobra context so that it can be accessed by all child commands
+	ctx := context.WithValue(context.TODO(), model.ClientConfigContext, config)
 	err := rootCmd.ExecuteContext(ctx)
 
 	if err != nil {
@@ -83,19 +63,14 @@ func Execute() {
 	}
 }
 
-func init() {
+func loadConfig() model.ClientConfig {
+	config := model.DefaultClientConfig
 
-}
-
-func loadConfig() model.ImporterConfig {
-	config := model.DefaultImporterConfig
-
-	// Default alias, if none provided
-	if config.LocalSend.Alias == "" {
-		config.LocalSend.Alias = util.GetHostname()
+	if config.ClientName == "" {
+		config.ClientName = util.GetHostname()
 	}
 
-	util.ReadConfig(&config, true, false, "importer.yml")
+	util.ReadConfig(&config, true, false, "client.yml")
 
 	return config
 }

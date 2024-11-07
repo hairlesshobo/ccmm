@@ -20,35 +20,26 @@
 //		limitations under the License.
 //
 // =================================================================================
-//go:build !linux && !darwin
 
-package util
+package main
 
-func TestPlatform() {
-	platformNotSupported(TestPlatform)
+import (
+	"ccmm/client/cmd"
+)
+
+func main() {
+	cmd.Execute()
 }
 
-func GetVolumeName(mountPath string) string {
-	platformNotSupported(GetVolumeName)
-	return ""
-}
+// import (
+// 	"fyne.io/fyne/v2/app"
+// 	"fyne.io/fyne/v2/widget"
+// )
 
-func MountVolume(device string) string {
-	platformNotSupported(GetVolumeName)
-	return ""
-}
+// func main() {
+// 	a := app.New()
+// 	w := a.NewWindow("Hello World")
 
-func UnmountVolume(device string) bool {
-	platformNotSupported(GetVolumeName)
-	return false
-}
-
-func GetVolumeFormat(device string) string {
-	platformNotSupported(GetVolumeName)
-	return ""
-}
-
-func PowerOffDevice(device string) bool {
-	platformNotSupported(GetVolumeName)
-	return false
-}
+// 	w.SetContent(widget.NewLabel("Hello World!"))
+// 	w.ShowAndRun()
+// }

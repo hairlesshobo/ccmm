@@ -23,14 +23,12 @@
 
 package model
 
-import "time"
-
-type SourceFile struct {
-	FileName    string
-	SourcePath  string
-	Size        int64
-	MediaType   string
-	SourceName  string
-	CaptureDate time.Time
-	FileModTime time.Time
+// SyncConfig is currently limited to providing sync support for services. Additional
+// resources, such as graphics, clips, documents, etc are not supported. That will be
+// designed and built later
+type SyncConfig struct {
+	Services   []string `json:"services"`
+	MediaTypes []string `json:"media_types"`
+	DryRun     bool     `json:"dry_run"`
+	Dump       bool     `json:"dump"`
 }

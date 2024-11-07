@@ -26,7 +26,9 @@ package model
 type ContextType string
 
 const (
-	ImportConfigContext ContextType = "importConfig"
+	ImportConfigContext  ContextType = "importConfig"
+	ClientConfigContext  ContextType = "clientConfig"
+	ManagerConfigContext ContextType = "managerConfig"
 )
 
 type ImporterConfig struct {
@@ -73,20 +75,36 @@ var DefaultImporterConfig = ImporterConfig{
 	},
 }
 
+type ClientConfig struct {
+	DataDirs       DataDirectories `yaml:"data_dirs"`
+	LogLevel       int8            `yaml:"log_level"`
+	ClientName     string          `yaml:"client_name"`
+	ManagerAddress string          `yaml:"manager_address"`
+}
+
+var DefaultClientConfig = ClientConfig{
+	DataDirs: DataDirectories{
+		Services: "./services/",
+	},
+	LogLevel:       -4,
+	ClientName:     "",
+	ManagerAddress: "http://localhost:7280",
+}
+
 type ManagerConfig struct {
-	DataDirs      ManagerDataDirs `yaml:"data_dirs"`
+	DataDirs      DataDirectories `yaml:"data_dirs"`
 	LogLevel      int8            `yaml:"log_level"`
 	ListenAddress string          `yaml:"listen_address"`
 	ListenPort    int32           `yaml:"listen_port"`
 	ForceReadOnly bool            `yaml:"force_read_only"`
 }
 
-type ManagerDataDirs struct {
+type DataDirectories struct {
 	Services string `yaml:"services"`
 }
 
 var DefaultManagerConfig = ManagerConfig{
-	DataDirs: ManagerDataDirs{
+	DataDirs: DataDirectories{
 		Services: "./services/",
 	},
 	LogLevel:      -4,

@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 )
 
 func GetHostname() string {
@@ -37,4 +38,22 @@ func GetHostname() string {
 	}
 
 	return hostname
+}
+
+func GetServiceQuarter(serviceDate time.Time) string {
+	quarter := 0
+	year := serviceDate.Year()
+	month := int16(serviceDate.Month())
+
+	if month >= 1 && month <= 3 {
+		quarter = 1
+	} else if month >= 4 && month <= 6 {
+		quarter = 2
+	} else if month >= 7 && month <= 9 {
+		quarter = 3
+	} else {
+		quarter = 4
+	}
+
+	return fmt.Sprintf("%d Q%d", year, quarter)
 }
