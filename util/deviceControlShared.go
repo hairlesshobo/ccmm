@@ -21,15 +21,9 @@
 //
 // =================================================================================
 
-package model
+package util
 
-type DeviceAttached struct {
-	DevicePath     string `json:"device_path"`
-	DryRun         bool   `json:"dry_run"`
-	NoUnmount      bool   `json:"no_unmount"`
-	NoPoweroff     bool   `json:"no_poweroff"`
-	AlreadyMounted bool   `json:"already_mounted"`
-	MountPath      string `json:"mount_path"`
-	// EjectOnComplete       bool   `json:"eject_on_complete"`
-	// EmptyVolumeOnComplete bool   `json:"empty_on_complete"`
-}
+const (
+	FAT32 = "FAT32"
+	ExFAT = "ExFAT"
+)

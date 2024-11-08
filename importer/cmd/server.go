@@ -31,6 +31,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -66,6 +67,29 @@ var (
 					os.Exit(1)
 				}
 			})
+
+			// special handling for mac systems that will spin up a diskutil watcher to
+			// trigger imports
+			if runtime.GOOS == "darwin" {
+				go util.WatchForDeviceMount(func(devicePath, volumePath string) {
+					deviceAttachedConfig := model.DeviceAttached{
+						AlreadyMounted: true,
+						DryRun:         config.ForceDryRun,
+						DevicePath:     devicePath,
+						MountPath:      volumePath,
+					}
+
+					// queue the import with the server intance
+					uri := fmt.Sprintf("http://%s/device_attached", deviceAttachedServer)
+					_, statusCode := util.CallServer(uri, deviceAttachedConfig)
+
+					if statusCode != 201 {
+						slog.Error("Unknown error occurred sending request")
+						os.Exit(1)
+					}
+				})
+			}
+
 			server.StartServer(config, serverListenAddress, serverListenPort)
 		},
 	}

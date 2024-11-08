@@ -51,11 +51,14 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			config := cmd.Context().Value(model.ImportConfigContext).(model.ImporterConfig)
 
-			var deviceAttachedConfig model.DeviceAttached
-			deviceAttachedConfig.DryRun = deviceAttachedDryRun || config.ForceDryRun
-			deviceAttachedConfig.DevicePath = args[0]
-			deviceAttachedConfig.NoUnmount = deviceAttachedNoUnmount
-			deviceAttachedConfig.NoPoweroff = deviceAttachedNoPoweroff
+			deviceAttachedConfig := model.DeviceAttached{
+				AlreadyMounted: false,
+				DryRun:         deviceAttachedDryRun || config.ForceDryRun,
+				DevicePath:     args[0],
+				NoUnmount:      deviceAttachedNoUnmount,
+				NoPoweroff:     deviceAttachedNoPoweroff,
+				MountPath:      "",
+			}
 
 			slog.Debug(fmt.Sprintf("%+v", deviceAttachedConfig))
 

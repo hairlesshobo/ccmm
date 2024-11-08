@@ -26,7 +26,7 @@
 
 # The directory to which auto-imported media should be copied
 #   default: ./uploads/
-live_data_dir: /home/flip/test
+live_data_dir: /Users/flip/test
 
 # Log levels:
 #   -4 DEBUG

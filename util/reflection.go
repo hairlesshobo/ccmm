@@ -40,5 +40,5 @@ func platformNotSupported(target any) {
 
 func getFunctionName(i interface{}) string {
 	parts := strings.Split(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), "/")
-	return strings.Join(parts[3:], "/")
+	return strings.Join(parts, "/")
 }

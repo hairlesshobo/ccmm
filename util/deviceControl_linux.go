@@ -120,6 +120,8 @@ func GetVolumeFormat(device string) string {
 		return ""
 	}
 
+	// TODO: add mapping here for vfat, exfat, etc
+
 	return strings.TrimSuffix(output, "\n")
 }
 

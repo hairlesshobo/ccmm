@@ -42,27 +42,28 @@ var (
 func DeviceAttached(config model.ImporterConfig, params model.DeviceAttached) {
 	slog.Info(fmt.Sprintf("Handle device attachment for '%s'", params.DevicePath))
 
-	mountedPath := ""
+	if !params.AlreadyMounted {
+		for i := 1; i <= mountRetries; i++ {
+			params.MountPath = util.MountVolume(params.DevicePath)
+			if params.MountPath != "" {
+				break
+			}
 
-	for i := 1; i <= mountRetries; i++ {
-		mountedPath = util.MountVolume(params.DevicePath)
-		if mountedPath != "" {
-			break
+			slog.Info(fmt.Sprintf("Failed to unmount device '%s', waiting %d seconds and trying again [attempt %d/%d",
+				params.DevicePath, mountRetryWaitSeconds, i, mountRetries))
+			time.Sleep(time.Duration(mountRetryWaitSeconds) * time.Second)
 		}
-
-		slog.Info(fmt.Sprintf("Failed to unmount device '%s', waiting %d seconds and trying again [attempt %d/%d",
-			params.DevicePath, mountRetryWaitSeconds, i, mountRetries))
-		time.Sleep(time.Duration(mountRetryWaitSeconds) * time.Second)
 	}
 
-	if mountedPath == "" {
+	if params.MountPath == "" {
 		slog.Error(fmt.Sprintf("Failed to mount device %s", params.DevicePath))
 		return
 	}
 
-	var importConfig model.ImportVolume
-	importConfig.DryRun = params.DryRun
-	importConfig.VolumePath = mountedPath
+	importConfig := model.ImportVolume{
+		DryRun:     params.DryRun,
+		VolumePath: params.MountPath,
+	}
 
 	Import(config, importConfig, func(_ *ImportQueueItem) {
 		// TODO: do empty, if enabled
