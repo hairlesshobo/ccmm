@@ -24,9 +24,6 @@
 package server
 
 import (
-	"encoding/json"
-	"io"
-	"log/slog"
 	"net/http"
 
 	"ccmm/importer/action"
@@ -39,16 +36,7 @@ import (
 //
 
 func importPost(config model.ImporterConfig, w http.ResponseWriter, r *http.Request) {
-	var importConfig model.ImportVolume
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		slog.Error("Failed to read request body: " + err.Error())
-	}
-
-	if err = json.Unmarshal(body, &importConfig); err != nil {
-		slog.Error("Failed to unmarshal JSON: " + err.Error())
-	}
+	importConfig := util.ReadJsonBody[model.ImportVolume](r)
 
 	importConfig.DryRun = importConfig.DryRun || config.ForceDryRun
 

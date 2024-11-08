@@ -23,13 +23,19 @@
 
 package server
 
-import "net/http"
+import (
+	"net/http"
+)
 
 //
 // private functions
 //
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
+	// config := getConfig(r)
+
 	w.WriteHeader(200)
 	w.Write([]byte("OK"))
+	// j, _ := json.MarshalIndent(config, "", "  ")
+	// w.Write(j)
 }

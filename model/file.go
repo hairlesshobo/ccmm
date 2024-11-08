@@ -47,10 +47,11 @@ type SyncRequest struct {
 	// Valid values:
 	//   - request
 	//   - plan
-	SyncType     string              `json:"sync_type"`
-	Services     []string            `json:"services"`
-	DataTypes    []string            `json:"data_types"`
-	ServiceFiles map[string]SyncFile `json:"service_files"`
+	// TODO: make this an enum?
+	SyncType     string                `json:"sync_type"`
+	Services     []string              `json:"services"`
+	MediaTypes   []string              `json:"media_types"`
+	ServiceFiles map[string][]SyncFile `json:"service_files"`
 }
 
 // SyncFile describes a file that is to be synchronized between the managet
@@ -59,9 +60,10 @@ type SyncFile struct {
 	FileName    string    `json:"file_name"`
 	FilePath    string    `json:"file_path"`
 	Directory   string    `json:"directory"`
-	MediaType   string    `json:"type"` // Audio, Photo, Video, etc...
+	MediaType   string    `json:"media_type"` // Audio, Photo, Video, etc...
 	Size        int64     `json:"size"`
 	FileModTime time.Time `json:"mod_dtm"`
+	Service     string    `json:"service"`
 
 	// possible actions:
 	//   none (file exists in both locations) - no transmission required
@@ -70,6 +72,7 @@ type SyncFile struct {
 	//   send (file needs to be sent from the manager or client side to the opposing side) - requires "add" or "update" on other side
 	//   moved (file needs to be moved on either the manager or client side to a new location) - no transmission required
 	//   delete (file needs to be deleted on either the manager or client side) - no transmission required
+	// TODO: make these enums?
 	ServerAction string `json:"manager_action"`
 	ClientAction string `json:"client_action"`
 }

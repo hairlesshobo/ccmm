@@ -24,8 +24,11 @@
 package util
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 )
@@ -56,4 +59,19 @@ func GetServiceQuarter(serviceDate time.Time) string {
 	}
 
 	return fmt.Sprintf("%d Q%d", year, quarter)
+}
+
+func ReadJsonBody[T any](r *http.Request) T {
+	var obj T
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.Error("Failed to read request body: " + err.Error())
+	}
+
+	if err = json.Unmarshal(body, &obj); err != nil {
+		slog.Error("Failed to unmarshal JSON: " + err.Error())
+	}
+
+	return obj
 }

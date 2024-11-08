@@ -24,9 +24,7 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"time"
@@ -64,18 +62,7 @@ func deviceAttachedPost(config model.ImporterConfig, w http.ResponseWriter, r *h
 		return
 	}
 
-	var attachDeviceConfig model.DeviceAttached
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		slog.Error("Failed to read request body: " + err.Error())
-	}
-
-	if err = json.Unmarshal(body, &attachDeviceConfig); err != nil {
-		slog.Error("Failed to unmarshal JSON: " + err.Error())
-	}
-
-	fmt.Printf("%+v\n", attachDeviceConfig)
+	attachDeviceConfig := util.ReadJsonBody[model.DeviceAttached](r)
 
 	if !util.FileExists(attachDeviceConfig.DevicePath) {
 		w.WriteHeader(500)

@@ -24,36 +24,52 @@
 package server
 
 import (
+	"ccmm/model"
+	"ccmm/util"
 	"encoding/json"
 	"fmt"
-	"log/slog"
+	"slices"
+
+	"ccmm/util/sync"
 	"net/http"
-	"os"
 )
 
 //
 // private functions
 //
 
-func getQuarters(w http.ResponseWriter, r *http.Request) {
+func syncRequest(w http.ResponseWriter, r *http.Request) {
 	config := getConfig(r)
 
-	entries, err := os.ReadDir(config.DataDirs.Services)
+	syncRequest := util.ReadJsonBody[model.SyncRequest](r)
 
-	if err != nil {
-		slog.Error(fmt.Sprintf("failed to read serice directory: %s", err.Error()))
-		http.Error(w, "failed to read serices directory", http.StatusInternalServerError)
-		return
+	for _, serviceDateStr := range syncRequest.Services {
+		theirFiles := syncRequest.ServiceFiles[serviceDateStr]
+		myFiles := sync.ScanService(serviceDateStr, syncRequest.MediaTypes, config.DataDirs.Services)
+
+		// look for files that we have and the they also have
+		for _, myFile := range myFiles {
+			idx := slices.IndexFunc(theirFiles, func(f model.SyncFile) bool { return f.FilePath == myFile.FilePath })
+
+			// found the file
+			if idx >= 0 {
+				theirFile := &syncRequest.ServiceFiles[serviceDateStr][idx]
+
+				if theirFile.Size == myFile.Size {
+					if theirFile.FileModTime == myFile.FileModTime {
+						theirFile.ClientAction = "none"
+						theirFile.ServerAction = "none"
+					} else {
+						fmt.Printf("   My DTM: %v\n", myFile.FileModTime)
+						fmt.Printf("Their DTM: %v\n", theirFile.FileModTime)
+					}
+				}
+
+			}
+		}
+
 	}
 
-	fmt.Printf("%+v\n", entries)
-	res, err := json.Marshal(entries)
-	if err != nil {
-		slog.Error(fmt.Sprintf("json convert failed: %s", err.Error()))
-		http.Error(w, "json convert failed", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(200)
-	w.Write(res)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(syncRequest)
 }

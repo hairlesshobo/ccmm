@@ -24,6 +24,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -77,17 +78,38 @@ func getLogger(config model.ManagerConfig) *httplog.Logger {
 	return logger
 }
 
+// HTTP middleware setting a value on the request context
+func MyMiddleware(config model.ManagerConfig) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// create new context from `r` request context
+			ctx := context.WithValue(r.Context(), model.ManagerConfigContext, config)
+
+			// call the next handler in the chain, passing the response writer and
+			// the updated request object with the new context value.
+			//
+			// note: context.Context values are nested, so any previously set
+			// values will be accessible as well, and the new `"user"` key
+			// will be accessible from this point forward.
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
 func setupRouting(config model.ManagerConfig) *chi.Mux {
-	router := chi.NewRouter()
+	r := chi.NewRouter()
 
-	router.Use(httplog.RequestLogger(getLogger(config)))
+	r.Use(httplog.RequestLogger(getLogger(config)))
 
-	router.Get("/health", healthCheck)
-	router.Get("/quarters", func(w http.ResponseWriter, r *http.Request) {
-		getQuarters(config, w, r)
-	})
-	// router.Post("/trigger_import", triggerImport)
-	// router.Post("/device_attached", triggerDeviceAttached)
+	r.Use(MyMiddleware(config))
 
-	return router
+	r.Get("/health", healthCheck)
+	r.Get("/api/v1/quarters", getQuarters)
+	r.Post("/api/v1/sync_request", syncRequest)
+
+	return r
+}
+
+func getConfig(r *http.Request) model.ManagerConfig {
+	return r.Context().Value(model.ManagerConfigContext).(model.ManagerConfig)
 }

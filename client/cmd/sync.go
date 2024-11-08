@@ -53,7 +53,9 @@ var (
 			syncConfig.Services = []string{
 				"2024-11-03",
 			}
-			syncConfig.MediaTypes = []string{}
+			syncConfig.MediaTypes = []string{
+				"Video",
+			}
 
 			slog.Debug(fmt.Sprintf("%+v", syncConfig))
 
