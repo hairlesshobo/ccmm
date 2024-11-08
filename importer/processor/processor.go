@@ -30,6 +30,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
 	"time"
@@ -115,6 +116,22 @@ func EnumerateSources(processors []Processor, dump bool) []model.SourceFile {
 		processorFiles := processor.EnumerateFiles()
 
 		allFiles = append(allFiles, processorFiles...)
+	}
+
+	for idx := range allFiles {
+		// TODO: add global filtering here for the following:
+		//   - empty directories
+		//   - 0 byte files
+		//   - ignore mac dot files
+		//   - files older than a certain period
+		//   - other stuff?
+
+		// TODO: we need to ensure that this only applies when operating on linux and pulling from exfat/vfat volumes
+		// this is to fix how linux handles file mod time on xfat/exfat devices
+		if runtime.GOOS == "linux" && time.Local != time.UTC {
+			patchedDtm, _ := time.ParseInLocation(time.DateTime, allFiles[idx].FileModTime.UTC().Format(time.DateTime), time.Local)
+			allFiles[idx].FileModTime = patchedDtm
+		}
 	}
 
 	if dump {
