@@ -49,10 +49,11 @@ func StartBroadcastUDP(config model.LocalSendConfig, message model.BroadcastMess
 
 	conn, err := net.ListenUDP("udp", localAddr)
 	if err != nil {
-		fmt.Println("Error creating UDP connection:", err)
+		slog.Error(fmt.Sprintf("Error creating UDP connection: %s", err.Error()))
 		return
 	}
 	defer conn.Close()
+
 	for {
 		_, err := conn.WriteToUDP(data, multicastAddr)
 		if err != nil {
