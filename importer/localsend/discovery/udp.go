@@ -23,6 +23,7 @@ import (
 	"ccmm/model"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net"
 	"time"
 )
@@ -55,12 +56,9 @@ func StartBroadcastUDP(config model.LocalSendConfig, message model.BroadcastMess
 	for {
 		_, err := conn.WriteToUDP(data, multicastAddr)
 		if err != nil {
-			fmt.Println("Failed to send message:", err)
-			panic(err)
+			slog.Warn(fmt.Sprintf("Failed to send message: %s", err.Error()))
 		}
-		// fmt.Println(num, "bytes write to multicastAddr")
-		//log
-		// fmt.Println("UDP Broadcast message sent!")
+
 		time.Sleep(5 * time.Second) // Send a broadcast message every 5 seconds
 	}
 }
