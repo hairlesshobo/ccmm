@@ -71,7 +71,7 @@ var (
 			// special handling for mac systems that will spin up a diskutil watcher to
 			// trigger imports
 			if runtime.GOOS == "darwin" {
-				go util.WatchForDeviceMount(func(devicePath, volumePath string) {
+				go util.WatchForDeviceAttached(func(devicePath, volumePath string) {
 					deviceAttachedConfig := model.DeviceAttached{
 						AlreadyMounted: true,
 						DryRun:         config.ForceDryRun,

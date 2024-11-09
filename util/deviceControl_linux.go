@@ -30,11 +30,18 @@ import (
 	"strings"
 )
 
+// TestPlatform is really intended only for development purposes while
+// building platform-specific functionality. Shouldn't be used for anything
+// else and will eventually be removed
 func TestPlatform() {
-	fmt.Println(UnmountVolume("/dev/sda1"))
+	// FSTYPE
+	// FSVER
+	fmt.Println(GetVolumeFormat("/media/flip/CANON"))
 	platformNotSupported(TestPlatform)
 }
 
+// GetVolumeName requires a path to a mounted volume
+// and will return the name of the volume as a string
 func GetVolumeName(mountPath string) string {
 	slog.Debug(fmt.Sprintf("Querying volume name at '%s'", mountPath))
 	command := "findmnt -n --output label --mountpoint %s0"
@@ -48,14 +55,11 @@ func GetVolumeName(mountPath string) string {
 	return strings.TrimSuffix(output, "\n")
 }
 
-func pathMounted(device string) bool {
-	findmntCommand := "findmnt %s0"
-	_, exitCode, _ := callExternalCommand(findmntCommand, device)
-
-	// device is mounted
-	return exitCode == 0
-}
-
+// MountVolume requires a device node (ex: /dev/sda1) be provided
+// and will either return an empty string on failure, or will
+// return the path to the newly mounted volume. The mounted path
+// is automatically determined by udisksctl and we have no control
+// over where it chooses to mount
 func MountVolume(device string) string {
 	// lets first make sure that the device isn't already mounted elsewhere,
 	// if it is, we'll use the path it is already mounted to
@@ -82,6 +86,9 @@ func MountVolume(device string) string {
 	return strings.Split(strings.TrimSuffix(output, "\n"), " at ")[1]
 }
 
+// UnmountVolume requires a device node (ex: /dev/sda1) be passed
+// and will unmount the volume. Returns true on success or false if
+// the unmount process failed
 func UnmountVolume(device string) bool {
 	// test to see if the provided device exists and is even mounted
 	// device is mounted
@@ -103,7 +110,11 @@ func UnmountVolume(device string) bool {
 	return exitCode == 0
 }
 
-func GetVolumeFormat(device string) string {
+// GetVolumeFormat requires that a mount path is provided (ex: /media/user/CANON)
+// and will return the format of the mounted filesystem at that point.
+// If an error occurs or an unknown format is mounted there, an empty
+// string will be returned instead
+func GetVolumeFormat(mountPath string) string {
 	// this should look up the filesystem type of a given device.
 	// This will allow us to filter what types of devices are
 	// automatically mounted and scanned. I clearly won't be needing
@@ -112,19 +123,49 @@ func GetVolumeFormat(device string) string {
 	// initial thoughts are only FAT-based disks should be imported
 	// there may be a need for NTFS or AFS at some point, but i doubt-ish
 	// it (maybe AFS for blackmagic gear)
-	command := "blkid -o value -s TYPE %s0"
-	output, exitCode, err := callExternalCommand(command, device)
+
+	command := "findmnt -o source -n %s0"
+	output, exitCode, err := callExternalCommand(command, mountPath)
+
+	// testing err and exit code may be redundant, but whatever
+	if err != nil || exitCode != 0 {
+		slog.Warn("Could not find a device mounted to the following path: " + mountPath)
+		return ""
+	}
+
+	devicePath := strings.TrimSpace(output)
+
+	command = "lsblk -o FSTYPE,FSVER -n -r %s0"
+	output, exitCode, err = callExternalCommand(command, devicePath)
 
 	// testing err and exit code may be redundant, but whatever
 	if err != nil || exitCode != 0 {
 		return ""
 	}
 
-	// TODO: add mapping here for vfat, exfat, etc
+	output = strings.TrimSpace(output)
+	parts := strings.Split(output, " ")
+	fstype := parts[0]
+	fsver := parts[1]
 
-	return strings.TrimSuffix(output, "\n")
+	if fstype == "vfat" && fsver == "FAT32" {
+		return FAT32
+	}
+
+	if fstype == "exfat" {
+		return ExFAT
+	}
+
+	slog.Warn("Unknown filesystem type: " + output)
+
+	return ""
 }
 
+// PowerOffDevice attempts to eject or power off the device
+// specified by the device parameter. This requires that a
+// device path (ex: /dev/sda1) be provided. Returns true if
+// it is successfully powered off (or was already powered off)
+// and false on failure
 func PowerOffDevice(device string) bool {
 	// this needs to be provided the path to the block device itself,
 	// for example /dev/sda (without the partition index). will need to
@@ -144,4 +185,22 @@ func PowerOffDevice(device string) bool {
 	_, _, err := callExternalCommand(command, device)
 
 	return err == nil
+}
+
+// WatchForDeviceAttached is not currently built for linux, but will be in the future
+func WatchForDeviceAttached(deviceMountedCallback func(devicePath string, volumePath string)) {
+	// TODO: build this instead of requiring udev rules be installed to the system
+	platformNotSupported(WatchForDeviceAttached)
+}
+
+//
+// private functions
+//
+
+func pathMounted(device string) bool {
+	findmntCommand := "findmnt %s0"
+	_, exitCode, _ := callExternalCommand(findmntCommand, device)
+
+	// device is mounted
+	return exitCode == 0
 }

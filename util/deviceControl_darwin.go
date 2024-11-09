@@ -33,6 +33,9 @@ import (
 	"strings"
 )
 
+// TestPlatform is really intended only for development purposes while
+// building platform-specific functionality. Shouldn't be used for anything
+// else and will eventually be removed
 func TestPlatform() {
 	// WatchForDeviceMount(func(devicePath, volumePath string) {
 	// 	fmt.Println("device mounted!")
@@ -44,34 +47,48 @@ func TestPlatform() {
 	// platformNotSupported(TestPlatform)
 }
 
+// GetVolumeName requires a path to a mounted volume
+// and will return the name of the volume as a string
 func GetVolumeName(mountPath string) string {
 	label := filepath.Base(mountPath)
 	return label
 }
 
+// MountVolume requires a device node (ex: /dev/disk1p1) be provided
+// and will either return an empty string on failure, or will
+// return the path to the newly mounted volume. The mounted path
+// is automatically determined by udisksctl and we have no control
+// over where it chooses to mount
 func MountVolume(device string) string {
 	panic("Not implemented")
 }
 
-func UnmountVolume(path string) bool {
+// UnmountVolume requires a device path (ex: /dev/disk7p1) be passed
+// and will unmount the volume. Returns true on success or false if
+// the unmount process failed
+func UnmountVolume(device string) bool {
 	// test to see if the provided device exists and is even mounted
 	// device is mounted
-	if !pathMounted(path) {
-		slog.Debug(fmt.Sprintf("Device is not mounted: '%s', nothing to do.", path))
+	if !pathMounted(device) {
+		slog.Debug(fmt.Sprintf("Device is not mounted: '%s', nothing to do.", device))
 
 		// we return true because the desire is for the provided device to be
 		// unmounted, and it already is
 		return true
 	}
 
-	slog.Info(fmt.Sprintf("Unmounting device '%s'", path))
+	slog.Info(fmt.Sprintf("Unmounting device '%s'", device))
 	command := "diskutil unmount %s0"
-	_, exitCode, _ := callExternalCommand(command, path)
+	_, exitCode, _ := callExternalCommand(command, device)
 
 	// 0 means it unmounted successfully
 	return exitCode == 0
 }
 
+// GetVolumeFormat requires that a mount path is provided (ex: /Volumes/CANON)
+// and will return the format of the mounted filesystem at that point.
+// If an error occurs or an unknown format is mounted there, an empty
+// string will be returned instead
 func GetVolumeFormat(mountPath string) string {
 	command := "diskutil info %s0"
 	output, exitCode, _ := callExternalCommand(command, mountPath)
@@ -93,13 +110,19 @@ func GetVolumeFormat(mountPath string) string {
 				return FAT32
 			}
 
-			return ""
+			slog.Warn("Unknown filesystem type: " + format)
+			break
 		}
 	}
 
 	return ""
 }
 
+// PowerOffDevice attempts to eject or power off the device
+// specified by the device parameter. This requires that a
+// device path (ex: /dev/disk7p1) be provided. Returns true if
+// it is successfully powered off (or was already powered off)
+// and false on failure
 func PowerOffDevice(device string) bool {
 	// test to see if the provided device exists
 	if !FileExists(device) {
@@ -118,11 +141,16 @@ func PowerOffDevice(device string) bool {
 	return exitCode == 0
 }
 
-func WatchForDeviceMount(deviceMountedCallback func(devicePath string, volumePath string)) {
+// WatchForDeviceAttached utilizes the `diskutil activity` command
+// to watch the system for changes to storage devices, When a
+// new devices is added and automatically mounted by the operating
+// system, the function deviceMountedCallback will be executed with
+// the devicePath and the volumePath of the newly mounted volume.
+func WatchForDeviceAttached(deviceMountedCallback func(devicePath string, volumePath string)) {
 	// run diskutil actiity and watch for "***DiskDescriptionChanged"
 	cmd := exec.Command("diskutil", "activity")
 	stdout, err := cmd.StdoutPipe()
-	// cmd.Stderr = cmd.Stdout
+
 	if err != nil {
 		slog.Error("Error occurred running 'diskutil activity' command: " + err.Error())
 		return
@@ -164,6 +192,10 @@ func WatchForDeviceMount(deviceMountedCallback func(devicePath string, volumePat
 		}
 	}
 }
+
+//
+// private functions
+//
 
 func pathMounted(path string) bool {
 	findmntCommand := "diskutil info %s0"
