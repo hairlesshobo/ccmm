@@ -2,8 +2,16 @@
 
 ## Introduction
 
-go-import-media, aka gim, is a tool for automatically importing media
-from removable disks into a predefined folder structure automatically.
+Connection Church Media Manager, aka ccmm, is a tool for managing all aspects of
+produced media. The eventual goal is for the tool to import, syncronize and backup
+data automatically. The tool is planned to be separated into the following 3 components:
+
+- **Importer:** a tool for automatically importing media from removable disks into a predefined 
+  folder structure automatically.
+- **Manager:** a daemon that runs on a server to index, organize, receive and synchronize files 
+  from multiple sources
+- **Client:** an appplication that will be placed on the computer of people in the church who
+  need acces to the media. 
 
 ## Why?
 
@@ -12,13 +20,18 @@ SD card or flash drive at a time and copying to my laptop, then syncing up to th
 server and then finally syncing to the additional storage drives + backblaze. This
 is super tedious and wastes a lot of time. 
 
-The goal of this project is to automatically import and organize media when it is 
-inserted into the machine. Since there are different types and sources of media,
-this project needs to be able to identify the type of media and organize accordingly.
+Additionally, we are growing rapidly and as we grow our volunteer base, it is going to
+become impossible to expect others to keep things organized and especially SAFE (think
+accidental deletions or files that don't make it back to the archive after being worked with).
+While I can't 100% protect from these things, by having a centralized system that manages the
+organization and synchronization automatically, I hope to reduce the risk here.
 
-## Features
+## Importer
 
-### Current
+### Features
+
+
+#### Current
   - Auto-mount an external drive (USB or SD card) that was connected to a Linux system via udev
   - Scan the mounted directory to determine if it was produced using a known data source (see supported media sources below)
   - Scan the directory for files that should be imported and gather metadata on them
@@ -26,19 +39,20 @@ this project needs to be able to identify the type of media and organize accordi
   - Auto-unmount the external drive, then power off for safe removal
   - Allow importing of media via integrated localsend server. Once a transfer completes, it will follow the usual import process to identify and import media
   - Localsend can be password protected and also supports sender ACLs (not intended for real security, more to prevent accidental ingestion of data)
+  - Current support for auto-import on Mac by watching diskutil for inserted disks
+  - Sorry, no windows support planned because windows.
 
-### Planned 
+#### Planned 
   - Verify enough scratch space prior to accepting transfer in localsend
   - Optionally empty/format a drive after import (will be configurable per-source type)
   - Build and integrate with a microcontroller to provide LED status lights for each card reader/usb port - (this might finally be a reason for me to buy a rasberry pi.. instead of adding an arduino)
   - Add status endpoint to server API for quickly checking status of importer
   - localsend https support
   - logging improvements
-  - support for running on mac with as full a feature set as possible. haven't yet explored mounting, unmounting, looking up volume names, etc. Sorry, no windows support planned because windows.
 
-## Media sources
+### Media sources
 
-## Supported
+#### Supported
   - `behringerX32` - For importing stereo audio recordings created by a Behringer X32
   - `behringerXLIVE` - For importing multi-track audio recordings created by a Behringer X-Live card
   - `blackmagicIOS` - For importing video recordings created by the Blackmagic IOS camera app
@@ -47,11 +61,14 @@ this project needs to be able to identify the type of media and organize accordi
   - `jackRecorder` - For importing multi-track wav files created by the fox-recorder
   - `zoomH6` - For importing multi-track wav files created by the Zoom H6 field recorder
 
-## Dependencies
+### Planned
   - `zoomH1n` - For importing stereo audio recorded by a Zoom H1n field recorder
+
+### Dependencies
 
 Linux:
 - blkid
+- lsblk
 - findmnt
 - udisks2 (for mounting, unmounting, and disk poweroff without sudo access)
 - udev
@@ -61,17 +78,45 @@ Linux:
 Mac:
 (coming soon)
 
-## Installation
+### Installation
 
 coming soon...
 
-## Usage
+### Usage
+
+coming soon...
+
+## Manager
+
+### Features
+
+coming soon...
+
+### Installation
+
+coming soon...
+
+### Usage
+
+coming soon...
+
+## Client
+
+### Features
+
+coming soon...
+
+### Installation
+
+coming soon...
+
+### Usage
 
 coming soon...
 
 ## License
 
-gim is licensed under the Apache-2.0 license
+ccmm is licensed under the Apache-2.0 license
 
 Copyright (c) 2024 Steve Cross <flip@foxhollow.cc>
 

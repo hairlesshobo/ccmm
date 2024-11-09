@@ -1,0 +1,245 @@
+{
+  "client_name": "armbook.sy.foxhollow.cc",
+  "sync_type": "request",
+  "services": [
+    "2024-11-03"
+  ],
+  "media_types": [
+    "Video"
+  ],
+  "service_files": {
+    "2024-11-03": [
+      {
+        "file_name": "DeliverPresetList.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Settings/DeliverPresetList.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Settings",
+        "media_type": "Video",
+        "size": 202,
+        "mod_dtm": "2024-11-03T15:27:59.791735975-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "PTZRInputPresetList.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Settings/PTZRInputPresetList.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Settings",
+        "media_type": "Video",
+        "size": 484,
+        "mod_dtm": "2024-11-03T15:27:59.790665217-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "PTZROutputPresetList.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Settings/PTZROutputPresetList.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Settings",
+        "media_type": "Video",
+        "size": 486,
+        "mod_dtm": "2024-11-03T15:27:59.790970928-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "SYSTEM CONFIG.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Settings/SYSTEM CONFIG.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Settings",
+        "media_type": "Video",
+        "size": 1335,
+        "mod_dtm": "2024-11-03T15:26:19.326690154-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "SlatePresetList.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Settings/SlatePresetList.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Settings",
+        "media_type": "Video",
+        "size": 198,
+        "mod_dtm": "2024-11-03T15:27:59.791369181-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "WindowsPresetList.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Settings/WindowsPresetList.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Settings",
+        "media_type": "Video",
+        "size": 204,
+        "mod_dtm": "2024-11-03T15:27:59.791949393-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "User Default Config.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/Configs/User Default Config.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/Configs",
+        "media_type": "Video",
+        "size": 1380,
+        "mod_dtm": "2024-11-03T15:26:20.280532744-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "Metadata.db",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/ProjectMetadataCache/Metadata.db",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/ProjectMetadataCache",
+        "media_type": "Video",
+        "size": 20480,
+        "mod_dtm": "2024-11-03T19:02:37.521985023-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "172d99a6-8ea5-4a93-aad1-fb946b7ff5d7.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders/172d99a6-8ea5-4a93-aad1-fb946b7ff5d7.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders",
+        "media_type": "Video",
+        "size": 6768,
+        "mod_dtm": "2024-11-03T17:22:27.902767356-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "3234f7c8-bdae-421f-8a5c-d986dc66e351.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders/3234f7c8-bdae-421f-8a5c-d986dc66e351.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders",
+        "media_type": "Video",
+        "size": 6724,
+        "mod_dtm": "2024-11-03T15:40:45.939073133-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "665ccea3-b786-42f2-b586-9349ccb633f9.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders/665ccea3-b786-42f2-b586-9349ccb633f9.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders",
+        "media_type": "Video",
+        "size": 7462,
+        "mod_dtm": "2024-11-03T19:45:14.736580634-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "97ff910f-af0e-4cf2-b543-d8709af5fd56.xml",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders/97ff910f-af0e-4cf2-b543-d8709af5fd56.xml",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Batch Renders",
+        "media_type": "Video",
+        "size": 6730,
+        "mod_dtm": "2024-11-03T19:13:58.72665674-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "Project.db",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03/Project.db",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest/Projects/CC 2024-11-03",
+        "media_type": "Video",
+        "size": 2945024,
+        "mod_dtm": "2024-11-03T19:54:14.978036149-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "User.db",
+        "file_path": "/Video/Davinci/Resolve Projects/Users/guest/User.db",
+        "directory": "/Video/Davinci/Resolve Projects/Users/guest",
+        "media_type": "Video",
+        "size": 2908160,
+        "mod_dtm": "2024-11-03T15:26:20.275928586-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "CC 2024-11-03 -- Sermon Sample.mp3",
+        "file_path": "/Video/Renders/CC 2024-11-03 -- Sermon Sample.mp3",
+        "directory": "/Video/Renders",
+        "media_type": "Video",
+        "size": 18238080,
+        "mod_dtm": "2024-11-03T18:07:34.094414433-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "CC 2024-11-03 -- Sermon.mov",
+        "file_path": "/Video/Renders/CC 2024-11-03 -- Sermon.mov",
+        "directory": "/Video/Renders",
+        "media_type": "Video",
+        "size": 6861463717,
+        "mod_dtm": "2024-11-03T19:45:14.183250793-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "CC 2024-11-03 -- Sermon.wav",
+        "file_path": "/Video/Renders/CC 2024-11-03 -- Sermon.wav",
+        "directory": "/Video/Renders",
+        "media_type": "Video",
+        "size": 739709646,
+        "mod_dtm": "2024-11-03T19:13:58.533595259-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "CC 2024-11-03 -- Word for Tiffany.mp3",
+        "file_path": "/Video/Renders/CC 2024-11-03 -- Word for Tiffany.mp3",
+        "directory": "/Video/Renders",
+        "media_type": "Video",
+        "size": 3800640,
+        "mod_dtm": "2024-11-03T17:22:27.46935744-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "CC 2024-11-03 -- Worship.mov",
+        "file_path": "/Video/Renders/CC 2024-11-03 -- Worship.mov",
+        "directory": "/Video/Renders",
+        "media_type": "Video",
+        "size": 1686925441,
+        "mod_dtm": "2024-11-03T15:40:45.612963865-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "A100C001_241103E8_CANON.MXF",
+        "file_path": "/Video/XA70/A100C001_241103E8_CANON.MXF",
+        "directory": "/Video/XA70",
+        "media_type": "Video",
+        "size": 32943038512,
+        "mod_dtm": "2024-11-03T07:29:41-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      },
+      {
+        "file_name": "A100C001_241103E8_CANON.XML",
+        "file_path": "/Video/XA70/A100C001_241103E8_CANON.XML",
+        "directory": "/Video/XA70",
+        "media_type": "Video",
+        "size": 434,
+        "mod_dtm": "2024-11-03T05:40:35-05:00",
+        "service": "2024-11-03",
+        "manager_action": "",
+        "client_action": ""
+      }
+    ]
+  }
+}

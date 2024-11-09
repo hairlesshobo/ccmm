@@ -3,8 +3,9 @@
 #
 #		ccmm - https://www.foxhollow.cc/projects/ccmm/
 #
-#	 go-import-media, aka gim, is a tool for automatically importing media
-#	 from removable disks into a predefined folder structure automatically.
+#	Connection Church Media Manager, aka ccmm, is a tool for managing all
+#   aspects of produced media- initial import from removable media,
+#   synchronization with clients and automatic data replication and backup
 #
 #		Copyright (c) 2024 Steve Cross <flip@foxhollow.cc>
 #
