@@ -36,10 +36,12 @@ import (
 	"time"
 
 	"ccmm/importer/processor/behringerX32"
+	"ccmm/importer/processor/behringerXLIVE"
 	"ccmm/importer/processor/blackmagicIOS"
 	"ccmm/importer/processor/canonEOS"
 	"ccmm/importer/processor/canonXA"
 	"ccmm/importer/processor/jackRecorder"
+	"ccmm/importer/processor/zoomH6"
 	"ccmm/model"
 	"ccmm/util"
 )
@@ -65,6 +67,10 @@ func initProcessors(config model.ImporterConfig, volumePath string) []Processor 
 		processors = append(processors, behringerX32.New(volumePath))
 	}
 
+	if useProcessor(config, "behringerXLIVE") {
+		processors = append(processors, behringerXLIVE.New(volumePath))
+	}
+
 	if useProcessor(config, "blackmagicIOS") {
 		processors = append(processors, blackmagicIOS.New(volumePath))
 	}
@@ -79,6 +85,10 @@ func initProcessors(config model.ImporterConfig, volumePath string) []Processor 
 
 	if useProcessor(config, "jackRecorder") {
 		processors = append(processors, jackRecorder.New(volumePath))
+	}
+
+	if useProcessor(config, "zoomH6") {
+		processors = append(processors, zoomH6.New(volumePath))
 	}
 
 	return processors

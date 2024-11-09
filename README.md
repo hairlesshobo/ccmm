@@ -40,16 +40,15 @@ this project needs to be able to identify the type of media and organize accordi
 
 ## Supported
   - `behringerX32` - For importing stereo audio recordings created by a Behringer X32
+  - `behringerXLIVE` - For importing multi-track audio recordings created by a Behringer X-Live card
   - `blackmagicIOS` - For importing video recordings created by the Blackmagic IOS camera app
   - `canonEOS` - For importing video and photos created by a Canon EOS camera (at least a 60D, not testing on any other yet)
   - `canonXA` - For importing video created by a Canon XA series camcorder, recording in MXF mode (only tested on XA70)
   - `jackRecorder` - For importing multi-track wav files created by the fox-recorder
-
-## Planned (not yet built)
-  - `behringerXlive` - For importing multitrack audio recorded by a behringer X-Live card
-  - `zoomH6` - For importing multitrack audio recorded by a Zoom H6 field recorder
+  - `zoomH6` - For importing multi-track wav files created by the Zoom H6 field recorder
 
 ## Dependencies
+  - `zoomH1n` - For importing stereo audio recorded by a Zoom H1n field recorder
 
 Linux:
 - blkid
