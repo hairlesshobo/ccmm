@@ -63,7 +63,6 @@ func GetVolumeName(mountPath string) string {
 func MountVolume(device string) string {
 	// lets first make sure that the device isn't already mounted elsewhere,
 	// if it is, we'll use the path it is already mounted to
-	// TODO: add retry logic
 	findmntCommand := "findmnt -o target -n %s0"
 	output, exitCode, _ := callExternalCommand(findmntCommand, device)
 

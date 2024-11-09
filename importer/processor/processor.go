@@ -172,6 +172,7 @@ func ImportFiles(config model.ImporterConfig, files []model.SourceFile, dryRun b
 			slog.Info(fmt.Sprintf("[Dry run] Would copy '%s' to '%s'", sourceFile.SourcePath, destPath))
 		} else {
 			slog.Info(fmt.Sprintf("Copying '%s' to '%s'", sourceFile.SourcePath, destPath))
+
 			// TODO: find a way to add transfer speeds to this
 			util.CopyFile(sourceFile.SourcePath, destPath)
 		}

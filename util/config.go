@@ -38,6 +38,7 @@ func ReadConfig(cfg interface{}, readYaml bool, readEnv bool, configFileName str
 	}
 
 	// TODO: re-add support for reading from environment variables
+	// TODO: add support for watching config and reloading in realtime
 }
 
 func processError(err error) {

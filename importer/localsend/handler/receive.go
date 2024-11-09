@@ -54,7 +54,6 @@ func getOutputFilePath(config model.LocalSendConfig, alias string, fileName stri
 }
 
 func PrepareReceive(config model.LocalSendConfig, message model.BroadcastMessage, w http.ResponseWriter, r *http.Request) {
-	// TODO: add ability to check for existing file with matching size and remove it from returned file list
 	pin := r.URL.Query().Get("pin")
 
 	var req model.PrepareReceiveRequest

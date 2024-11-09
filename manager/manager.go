@@ -49,9 +49,6 @@ func main() {
 	slog.Info("Configured services data directory: " + config.DataDirs.Services)
 
 	server.StartServer(config)
-
-	// TODO: add config entries to enable/disable importer server
-	// TODO: add config entries to enable/disable localsend server
 }
 
 func loadConfig() model.ManagerConfig {

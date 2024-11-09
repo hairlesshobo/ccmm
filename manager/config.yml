@@ -24,8 +24,10 @@
 ## This is the configuration file for ccmm manager. Any values not provided will
 ## use the defaults
 
-# TODO: comment here
+# Directory paths where various data is stored locally on the manager
 data_dirs: 
+
+  # This is the path where the manager copy of services are stored
   services: /Users/flip/test
 
 # Log levels:
