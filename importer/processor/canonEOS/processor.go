@@ -50,8 +50,9 @@ var (
 )
 
 type Processor struct {
-	sourceDir  string
-	sourceName string
+	sourceDir    string
+	sourceName   string
+	volumeFormat string
 }
 
 func New(sourceDir string) *Processor {
@@ -65,6 +66,8 @@ func New(sourceDir string) *Processor {
 
 func (t *Processor) CheckSource() bool {
 	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
+
+	t.volumeFormat = util.GetVolumeFormat(t.sourceDir)
 
 	// verify volume label matches what the camera sets
 	logger.Debug(fmt.Sprintf("[CheckSource]: Testing volume name at '%s'", t.sourceDir))
@@ -189,14 +192,16 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 					mediaType = "Video"
 				}
 
-				var newFile model.SourceFile
-				newFile.FileName = entry.Name()
-				newFile.SourcePath = fullPath
-				newFile.MediaType = mediaType
-				newFile.Size = stat.Size()
-				newFile.SourceName = t.getCameraModel(fullPath)
-				newFile.CaptureDate = t.getCaptureDate(stat.ModTime())
-				newFile.FileModTime = stat.ModTime()
+				newFile := model.SourceFile{
+					FileName:     entry.Name(),
+					SourcePath:   fullPath,
+					MediaType:    mediaType,
+					Size:         stat.Size(),
+					SourceName:   t.getCameraModel(fullPath),
+					CaptureDate:  t.getCaptureDate(stat.ModTime()),
+					FileModTime:  stat.ModTime(),
+					VolumeFormat: t.volumeFormat,
+				}
 
 				files = append(files, newFile)
 			}

@@ -96,7 +96,6 @@ func FindProcessors(config model.ImporterConfig, volumePath string) []Processor 
 	}
 
 	if len(foundProcessors) == 0 {
-		// TODO: eject and flash yellow if no processor found
 		slog.Warn(fmt.Sprintf("processor.FindProcessors: No processor found for volume path '%s', skipping", volumePath))
 		return nil
 	}
@@ -119,6 +118,8 @@ func EnumerateSources(processors []Processor, dump bool) []model.SourceFile {
 	}
 
 	for idx := range allFiles {
+		file := &allFiles[idx]
+
 		// TODO: add global filtering here for the following:
 		//   - empty directories
 		//   - 0 byte files
@@ -126,11 +127,10 @@ func EnumerateSources(processors []Processor, dump bool) []model.SourceFile {
 		//   - files older than a certain period
 		//   - other stuff?
 
-		// TODO: we need to ensure that this only applies when operating on linux and pulling from exfat/vfat volumes
 		// this is to fix how linux handles file mod time on xfat/exfat devices
-		if runtime.GOOS == "linux" && time.Local != time.UTC {
-			patchedDtm, _ := time.ParseInLocation(time.DateTime, allFiles[idx].FileModTime.UTC().Format(time.DateTime), time.Local)
-			allFiles[idx].FileModTime = patchedDtm
+		if runtime.GOOS == "linux" && time.Local != time.UTC && (file.VolumeFormat == util.FAT32 || file.VolumeFormat == util.ExFAT) {
+			patchedDtm, _ := time.ParseInLocation(time.DateTime, file.FileModTime.UTC().Format(time.DateTime), time.Local)
+			file.FileModTime = patchedDtm
 		}
 	}
 

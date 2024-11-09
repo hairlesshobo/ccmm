@@ -45,7 +45,8 @@ var (
 )
 
 type Processor struct {
-	sourceDir string
+	sourceDir    string
+	volumeFormat string
 }
 
 func New(sourceDir string) *Processor {
@@ -58,6 +59,8 @@ func New(sourceDir string) *Processor {
 
 func (t *Processor) CheckSource() bool {
 	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
+
+	t.volumeFormat = util.GetVolumeFormat(t.sourceDir)
 
 	// check for jack directory
 	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
@@ -79,7 +82,7 @@ func (t *Processor) CheckSource() bool {
 }
 
 func (t *Processor) EnumerateFiles() []model.SourceFile {
-	return scanDirectory(path.Join(t.sourceDir, "jack"), "jack")
+	return t.scanDirectory(path.Join(t.sourceDir, "jack"), "jack")
 }
 
 // private functions
@@ -96,7 +99,7 @@ func getCaptureDate(directoryName string) time.Time {
 	return dtm
 }
 
-func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
+func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
 	logger.Debug(fmt.Sprintf("[scanDirectory]: Scanning for source files at path '%s'", absoluteDirPath))
 
 	var files []model.SourceFile
@@ -114,7 +117,7 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 		relativePath := path.Join(relativeDirPath, entry.Name())
 
 		if entry.IsDir() {
-			files = append(files, scanDirectory(fullPath, path.Join(relativeDirPath, entry.Name()))...)
+			files = append(files, t.scanDirectory(fullPath, path.Join(relativeDirPath, entry.Name()))...)
 		} else {
 			foundMatch := false
 
@@ -131,14 +134,16 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 				stat, _ := os.Stat(fullPath)
 				_, dirName := path.Split(absoluteDirPath)
 
-				var newFile model.SourceFile
-				newFile.FileName = entry.Name()
-				newFile.SourcePath = fullPath
-				newFile.MediaType = mediaType
-				newFile.Size = stat.Size()
-				newFile.SourceName = "Jack"
-				newFile.CaptureDate = getCaptureDate(dirName)
-				newFile.FileModTime = stat.ModTime()
+				newFile := model.SourceFile{
+					FileName:     entry.Name(),
+					SourcePath:   fullPath,
+					MediaType:    mediaType,
+					Size:         stat.Size(),
+					SourceName:   "Jack",
+					CaptureDate:  getCaptureDate(dirName),
+					FileModTime:  stat.ModTime(),
+					VolumeFormat: t.volumeFormat,
+				}
 
 				files = append(files, newFile)
 			}

@@ -48,7 +48,8 @@ var (
 )
 
 type Processor struct {
-	sourceDir string
+	sourceDir    string
+	volumeFormat string
 }
 
 func New(sourceDir string) *Processor {
@@ -61,6 +62,8 @@ func New(sourceDir string) *Processor {
 
 func (t *Processor) CheckSource() bool {
 	logger.Debug(fmt.Sprintf("[CheckSource]: Beginning to test volume compatibility for '%s'", t.sourceDir))
+
+	t.volumeFormat = util.GetVolumeFormat(t.sourceDir)
 
 	// verify volume label matches what is expected
 	logger.Debug(fmt.Sprintf("[CheckSource]: Testing volume name at '%s'", t.sourceDir))
@@ -82,7 +85,7 @@ func (t *Processor) CheckSource() bool {
 }
 
 func (t *Processor) EnumerateFiles() []model.SourceFile {
-	return scanDirectory(t.sourceDir, "")
+	return t.scanDirectory(t.sourceDir, "")
 }
 
 // private functions
@@ -101,7 +104,7 @@ func getCaptureDate(fileName string) time.Time {
 	return dtm
 }
 
-func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
+func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string) []model.SourceFile {
 	logger.Debug(fmt.Sprintf("[scanDirectory]: Scanning for source files at path '%s'", absoluteDirPath))
 
 	var files []model.SourceFile
@@ -138,14 +141,16 @@ func scanDirectory(absoluteDirPath string, relativeDirPath string) []model.Sourc
 					continue
 				}
 
-				var newFile model.SourceFile
-				newFile.FileName = entry.Name()
-				newFile.SourcePath = fullPath
-				newFile.MediaType = mediaType
-				newFile.Size = stat.Size()
-				newFile.SourceName = "X32"
-				newFile.CaptureDate = getCaptureDate(entry.Name())
-				newFile.FileModTime = stat.ModTime()
+				newFile := model.SourceFile{
+					FileName:     entry.Name(),
+					SourcePath:   fullPath,
+					MediaType:    mediaType,
+					Size:         stat.Size(),
+					SourceName:   "X32",
+					CaptureDate:  getCaptureDate(entry.Name()),
+					FileModTime:  stat.ModTime(),
+					VolumeFormat: t.volumeFormat,
+				}
 
 				files = append(files, newFile)
 			}

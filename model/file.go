@@ -28,13 +28,14 @@ import "time"
 // SourceFile desribes a file that is identified to be imported by
 // the importer tool
 type SourceFile struct {
-	FileName    string
-	SourcePath  string
-	Size        int64
-	MediaType   string
-	SourceName  string
-	CaptureDate time.Time
-	FileModTime time.Time
+	FileName     string
+	SourcePath   string
+	Size         int64
+	MediaType    string
+	SourceName   string
+	CaptureDate  time.Time
+	FileModTime  time.Time
+	VolumeFormat string
 }
 
 // SyncRequest describes a request to synchronize between client
