@@ -49,7 +49,7 @@ func DeviceAttached(config model.ImporterConfig, params model.DeviceAttached) {
 				break
 			}
 
-			slog.Info(fmt.Sprintf("Failed to unmount device '%s', waiting %d seconds and trying again [attempt %d/%d",
+			slog.Info(fmt.Sprintf("Failed to mount device '%s', waiting %d seconds and trying again [attempt %d/%d",
 				params.DevicePath, mountRetryWaitSeconds, i, mountRetries))
 			time.Sleep(time.Duration(mountRetryWaitSeconds) * time.Second)
 		}
