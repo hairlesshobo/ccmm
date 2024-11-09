@@ -1,4 +1,4 @@
-# gim
+# Connection Church Media Manager (ccmm)
 
 ## Introduction
 
@@ -136,7 +136,7 @@ Portions of the code, specifically those providing localsend server functionalit
 written by MeowRain for the [`localsend-go`](https://github.com/meowrain/localsend-go) project. The 
 files in question all have the MIT license clearly mentioned in the file header. For the sake of 
 simplicity, any additions by Steve Cross to the localsend files are also licensed under the MIT 
-license, while the rest of the gim project is still licensed under Apache-2.0. For a complete 
+license, while the rest of the ccmm project is still licensed under Apache-2.0. For a complete 
 copy of the MIT license text, see the `LICENSE-MIT` file in the root of this project. The 
 following copyright applies to all localsend-related files only:
 
@@ -145,5 +145,5 @@ Copyright (c) 2024 MeowRain
 
 ## Links
 
-- [Project on GitHub](https://github.com/hairlesshobo/gim/)
-- [Project Homepage](https://www.foxhollow.cc/projects/gim/)
+- [Project on GitHub](https://github.com/hairlesshobo/ccmm/)
+- [Project Homepage](https://www.foxhollow.cc/projects/ccmm/)

@@ -1,6 +1,5 @@
 dist/
 uploads/
-gim
 .DS_Store
 ._*
 config.*.safe.yml
