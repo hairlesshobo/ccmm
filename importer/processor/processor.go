@@ -42,6 +42,7 @@ import (
 	"ccmm/importer/processor/canonEOS"
 	"ccmm/importer/processor/canonXA"
 	"ccmm/importer/processor/jackRecorder"
+	"ccmm/importer/processor/nikonD3300"
 	"ccmm/importer/processor/zoomH1n"
 	"ccmm/importer/processor/zoomH6"
 	"ccmm/model"
@@ -87,6 +88,10 @@ func InitProcessors(enabledProcessors []string, volumePath string) []Processor {
 
 	if useProcessor(enabledProcessors, "jackRecorder") {
 		processors = append(processors, jackRecorder.New(volumePath))
+	}
+
+	if useProcessor(enabledProcessors, "nikonD3300") {
+		processors = append(processors, nikonD3300.New(volumePath))
 	}
 
 	if useProcessor(enabledProcessors, "zoomH1n") {

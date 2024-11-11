@@ -59,6 +59,8 @@ organization and synchronization automatically, I hope to reduce the risk here.
   - `canonEOS` - For importing video and photos created by a Canon EOS camera (at least a 60D, not testing on any other yet)
   - `canonXA` - For importing video created by a Canon XA series camcorder, recording in MXF mode (only tested on XA70)
   - `jackRecorder` - For importing multi-track wav files created by the fox-recorder
+  - `nikonD3300` - For importing video and photos from a Nikon D3300
+  - `zoomH1n` - For importing multi-track wav files created by the Zoom H1n field recorder
   - `zoomH6` - For importing multi-track wav files created by the Zoom H6 field recorder
 
 ### Planned
