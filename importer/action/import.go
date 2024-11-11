@@ -106,6 +106,13 @@ func ImportWorker() {
 		queueItem := importQueue[firstQueueIndex]
 		importMutex.Unlock()
 
+		// there seems to be some sort of race condition here, so this is a workaround for it
+		if queueItem == nil || queueItem.processCallback == nil {
+			slog.Debug(fmt.Sprintf("Process callback not set for queue item #%d, trying again..", firstQueueIndex))
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+
 		slog.Info(fmt.Sprintf("Processing import queue item '%d', volume path: '%s'", firstQueueIndex, queueItem.Params.VolumePath))
 
 		queueItem.processCallback(queueItem)
