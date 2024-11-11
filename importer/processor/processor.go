@@ -42,6 +42,7 @@ import (
 	"ccmm/importer/processor/canonEOS"
 	"ccmm/importer/processor/canonXA"
 	"ccmm/importer/processor/jackRecorder"
+	"ccmm/importer/processor/zoomH1n"
 	"ccmm/importer/processor/zoomH6"
 	"ccmm/model"
 	"ccmm/util"
@@ -52,11 +53,11 @@ type Processor interface {
 	EnumerateFiles() []model.SourceFile
 }
 
-func useProcessor(config model.ImporterConfig, name string) bool {
-	return len(config.EnabledProcessors) == 0 || slices.Contains(config.EnabledProcessors, name)
+func useProcessor(enabledProcessors []string, name string) bool {
+	return len(enabledProcessors) == 0 || slices.Contains(enabledProcessors, name)
 }
 
-func initProcessors(config model.ImporterConfig, volumePath string) []Processor {
+func InitProcessors(enabledProcessors []string, volumePath string) []Processor {
 	processors := []Processor{}
 
 	// I hate this. it hurts me. this should be in a map that is referenced and
@@ -64,31 +65,35 @@ func initProcessors(config model.ImporterConfig, volumePath string) []Processor 
 	// new and couldn't figure it out quickly in go land, so i decided to go this
 	// route for now. gross, but works.
 
-	if useProcessor(config, "behringerX32") {
+	if useProcessor(enabledProcessors, "behringerX32") {
 		processors = append(processors, behringerX32.New(volumePath))
 	}
 
-	if useProcessor(config, "behringerXLIVE") {
+	if useProcessor(enabledProcessors, "behringerXLIVE") {
 		processors = append(processors, behringerXLIVE.New(volumePath))
 	}
 
-	if useProcessor(config, "blackmagicIOS") {
+	if useProcessor(enabledProcessors, "blackmagicIOS") {
 		processors = append(processors, blackmagicIOS.New(volumePath))
 	}
 
-	if useProcessor(config, "canonEOS") {
+	if useProcessor(enabledProcessors, "canonEOS") {
 		processors = append(processors, canonEOS.New(volumePath))
 	}
 
-	if useProcessor(config, "canonXA") {
+	if useProcessor(enabledProcessors, "canonXA") {
 		processors = append(processors, canonXA.New(volumePath))
 	}
 
-	if useProcessor(config, "jackRecorder") {
+	if useProcessor(enabledProcessors, "jackRecorder") {
 		processors = append(processors, jackRecorder.New(volumePath))
 	}
 
-	if useProcessor(config, "zoomH6") {
+	if useProcessor(enabledProcessors, "zoomH1n") {
+		processors = append(processors, zoomH1n.New(volumePath))
+	}
+
+	if useProcessor(enabledProcessors, "zoomH6") {
 		processors = append(processors, zoomH6.New(volumePath))
 	}
 
@@ -97,7 +102,7 @@ func initProcessors(config model.ImporterConfig, volumePath string) []Processor 
 
 func FindProcessors(config model.ImporterConfig, volumePath string) []Processor {
 	slog.Info(fmt.Sprintf("processor.FindProcessors: Looking for processors to handle path '%s'", volumePath))
-	processors := initProcessors(config, volumePath)
+	processors := InitProcessors(config.EnabledProcessors, volumePath)
 	var foundProcessors []Processor
 
 	for _, processor := range processors {

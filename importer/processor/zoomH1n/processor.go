@@ -22,14 +22,13 @@
 //
 // =================================================================================
 
-package zoomH6
+package zoomH1n
 
 import (
 	"fmt"
 	"log/slog"
 	"os"
 	"path"
-	"path/filepath"
 	"regexp"
 	"time"
 
@@ -37,11 +36,11 @@ import (
 	"ccmm/util"
 )
 
-const expectedVolumeName = "H6_SD"
+const expectedVolumeName = "H1N_SD"
 
 var (
 	fileMatchPatterns = [...]string{
-		`FOLDER\d{2}/ZOOM\d{4}/ZOOM\d{4}_(BU|LR|Tr1|Tr2|Tr3|Tr4)(-\d{4})?.WAV`,
+		`STEREO/FOLDER\d{2}/ZOOM\d{4}.WAV`,
 	}
 	logger *slog.Logger
 )
@@ -54,7 +53,7 @@ type Processor struct {
 }
 
 func New(sourceDir string) *Processor {
-	logger = slog.Default().With(slog.String("processor", "zoomH6"))
+	logger = slog.Default().With(slog.String("processor", "zoomH1n"))
 
 	processor := &Processor{
 		sourceDir:    sourceDir,
@@ -89,26 +88,18 @@ func (t *Processor) CheckSource() bool {
 		return false
 	}
 
-	// check for /FOLDERxx directories
+	// check for /STEREO directory
 	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
-	exists, folderPath := util.RequireRegexDirMatch(t.sourceDir, `FOLDER\d{2}`)
-	if !exists {
+	if !util.RequireDirs(t.sourceDir, []string{"STEREO"}) {
 		logger.Debug("[CheckSource]: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
-	// check for FOLDERxx/ZOOMxxxx directory
-	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of FOLDERxx/ZOOMxxxx directory in volume '%s'", t.sourceDir))
-	exists, folderPath = util.RequireRegexDirMatch(folderPath, `ZOOM\d{4}`)
-	if !exists {
-		logger.Debug("[CheckSource]: No '/FOLDERxx/ZOOMxxxx' directory found, disqualified")
-		return false
-	}
+	// check for /STEREO/FOLDERxx directories
+	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
 
-	// check for FOLDERxx/ZOOMxxxx/xxxxxx-xxxxxx.hprj file
-	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of FOLDERxx/ZOOMxxxx/xxxxxx-xxxxxx.hprj file in volume '%s'", t.sourceDir))
-	if exists, _ := util.RequireRegexFileMatch(folderPath, `\d{6}-\d{6}.hprj`); !exists {
-		logger.Debug("[CheckSource]: No '/FOLDERxx/ZOOMxxxx/xxxxxx-xxxxxx.hprj' file found, disqualified")
+	if exists, _ := util.RequireRegexDirMatch(path.Join(t.sourceDir, "STEREO"), `FOLDER\d{2}`); !exists {
+		logger.Debug("[CheckSource]: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
@@ -117,22 +108,14 @@ func (t *Processor) CheckSource() bool {
 }
 
 func (t *Processor) EnumerateFiles() []model.SourceFile {
-	return t.scanDirectory(t.sourceDir, "")
+	// TODO: does this thing use a dir other than STEREO, perhaps if recording in dual mono?
+	return t.scanDirectory(path.Join(t.sourceDir, "STEREO"), "STEREO")
 }
 
 // private functions
-func (t *Processor) getCaptureDate(captureDirectory string) time.Time {
-	exists, sidecarFile := util.RequireRegexFileMatch(captureDirectory, `\d{6}-\d{6}.hprj`)
-
-	if !exists {
-		panic("We should never make it here")
-	}
-
-	basename := filepath.Base(sidecarFile)
-
-	format := "060102 MST"
-	zone, _ := time.Now().Zone()
-	date, err := time.Parse(format, fmt.Sprintf("%s %s", basename[0:6], zone))
+func (t *Processor) getCaptureDate(dtm time.Time) time.Time {
+	format := "2006-01-02 MST"
+	date, err := time.Parse(format, dtm.Format(format))
 
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to parse date, error: %s", err.Error()))
@@ -193,7 +176,7 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 					MediaType:    "Audio",
 					Size:         stat.Size(),
 					SourceName:   "Zoom H6",
-					CaptureDate:  t.getCaptureDate(absoluteDirPath),
+					CaptureDate:  t.getCaptureDate(stat.ModTime()),
 					FileModTime:  stat.ModTime(),
 					VolumeFormat: t.volumeFormat,
 				}
