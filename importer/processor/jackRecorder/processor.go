@@ -30,6 +30,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strings"
 	"time"
 
 	"ccmm/model"
@@ -40,7 +41,7 @@ const mediaType = "Audio"
 
 var (
 	fileMatchPatterns = [...]string{
-		`jack/\d{4}-\d{2}-\d{2}/([\w\d_-]+).wav`,
+		`jack/\d{4}-\d{2}-\d{2}([\w\d_\-/]+)([\w\d_-]+).wav`,
 	}
 	logger *slog.Logger
 )
@@ -90,7 +91,7 @@ func (t *Processor) EnumerateFiles() []model.SourceFile {
 
 func getCaptureDate(directoryName string) time.Time {
 	zone, _ := time.Now().Zone()
-	dtmStr := fmt.Sprintf("%s %s", directoryName, zone)
+	dtmStr := fmt.Sprintf("%s %s", strings.TrimSuffix(directoryName[5:15], "/"), zone)
 	dtm, err := time.Parse("2006-01-02 MST", dtmStr)
 
 	if err != nil {
@@ -130,18 +131,24 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 			}
 
 			if foundMatch {
-				logger.Debug(fmt.Sprintf("[scanDirectory]: Matched file '%s'", fullPath))
+				logger.Debug(fmt.Sprintf("[scanDirectory]: Matched file '%s'... %s", fullPath, relativeDirPath))
+
+				parentName := ""
+
+				if strings.Count(relativeDirPath, "/") > 1 {
+					parentName = strings.TrimSuffix(relativeDirPath[16:], "/") + "/"
+				}
 
 				stat, _ := os.Stat(fullPath)
-				_, dirName := path.Split(absoluteDirPath)
+				// _, dirName := path.Split(absoluteDirPath)
 
 				newFile := model.SourceFile{
-					FileName:     entry.Name(),
+					FileName:     parentName + entry.Name(),
 					SourcePath:   fullPath,
 					MediaType:    mediaType,
 					Size:         stat.Size(),
 					SourceName:   "Jack",
-					CaptureDate:  getCaptureDate(dirName),
+					CaptureDate:  getCaptureDate(relativePath),
 					FileModTime:  stat.ModTime(),
 					VolumeFormat: t.volumeFormat,
 				}

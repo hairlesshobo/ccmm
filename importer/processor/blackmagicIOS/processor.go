@@ -127,14 +127,15 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 			stat, _ := os.Stat(fullPath)
 			label := filepath.Base(absoluteDirPath)
 
-			var newFile model.SourceFile
-			newFile.FileName = entry.Name()
-			newFile.SourcePath = fullPath
-			newFile.MediaType = "Video"
-			newFile.Size = stat.Size()
-			newFile.SourceName = label
-			newFile.CaptureDate = t.getCaptureDate(fullPath)
-			newFile.FileModTime = stat.ModTime()
+			newFile := model.SourceFile{
+				FileName:    entry.Name(),
+				SourcePath:  fullPath,
+				MediaType:   "Video",
+				Size:        stat.Size(),
+				SourceName:  label,
+				CaptureDate: t.getCaptureDate(fullPath),
+				FileModTime: stat.ModTime(),
+			}
 
 			files = append(files, newFile)
 		}
