@@ -73,6 +73,8 @@ Linux:
 - udev
 - systemd
 - polkit
+- exiftool
+- mediainfo
 
 Mac:
 (coming soon)
