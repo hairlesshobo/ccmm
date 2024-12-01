@@ -44,7 +44,7 @@ const mediaType = "Audio"
 
 var (
 	fileMatchPatterns = [...]string{
-		`X_LIVE/[A-Z|0-9]{8}/\d{8}.WAV`,
+		`X_LIVE/[A-Z|0-9]{8}/[A-Z0-9]{8}.WAV`,
 		`X_LIVE/[A-Z|0-9]{8}/SE_LOG.BIN`,
 	}
 	logger *slog.Logger
