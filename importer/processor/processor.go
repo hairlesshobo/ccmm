@@ -30,6 +30,7 @@ import (
 	"log/slog"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"slices"
@@ -165,11 +166,11 @@ func EnumerateSources(processors []Processor, dump bool) []model.SourceFile {
 
 func ImportFiles(config model.ImporterConfig, files []model.SourceFile, dryRun bool) {
 	for _, sourceFile := range files {
-		destDir := util.GetDestinationDirectory(config.LiveDataDir, sourceFile)
-		destPath := path.Join(destDir, sourceFile.FileName)
+		destPath := path.Join(util.GetDestinationDirectory(config.LiveDataDir, sourceFile), sourceFile.FileName)
 
 		// Create the dir and parents, if needed
 		if !dryRun {
+			destDir := filepath.Dir(destPath)
 			os.MkdirAll(destDir, 0755)
 		}
 
