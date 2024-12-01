@@ -36,8 +36,7 @@ import (
 	"ccmm/model"
 	"ccmm/util"
 
-	"github.com/rwcarlsen/goexif/exif"
-	"github.com/rwcarlsen/goexif/mknote"
+	"github.com/barasher/go-exiftool"
 )
 
 const expectedVolumeName = "EOS_DIGITAL"
@@ -46,22 +45,22 @@ var (
 	fileMatchPatterns = [...]string{
 		`DCIM/(\d+)CANON/IMG_(\d+).CR2`,
 		`DCIM/(\d+)CANON/MVI_(\d+).MOV`,
+		`DCIM/(\d+)(CANON|EOS)([\w\d]{0,})/([\w\d_]{4}(\d{4})).(MOV|CR2|CR3|MP4)`,
 	}
 	logger *slog.Logger
 )
 
 type Processor struct {
 	sourceDir    string
-	sourceName   string
 	volumeFormat string
+	etHandle     *exiftool.Exiftool
 }
 
 func New(sourceDir string) *Processor {
 	logger = slog.Default().With(slog.String("processor", "canonEOS"))
 
 	return &Processor{
-		sourceDir:  sourceDir,
-		sourceName: "",
+		sourceDir: sourceDir,
 	}
 }
 
@@ -77,24 +76,41 @@ func (t *Processor) CheckSource() bool {
 		return false
 	}
 
-	// check for /DCIM and /MISC and /DCIM/EOSMISC directories
+	// check for /DCIM and /MISC directories
 	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for required directories for volume '%s'", t.sourceDir))
-	if !util.RequireDirs(t.sourceDir, []string{"DCIM", "MISC", "DCIM/EOSMISC"}) {
+	if !util.RequireDirs(t.sourceDir, []string{"DCIM", "MISC"}) {
 		logger.Debug("[CheckSource]: One or more required directories does not exist on source, disqualified")
 		return false
 	}
 
-	// check for DCIM/(\d+)CANON directory
-	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of DCIM/xxxCANON directory in volume '%s'", t.sourceDir))
-	if exists, _ := util.RequireRegexDirMatch(path.Join(t.sourceDir, "DCIM"), `(\d+)CANON`); !exists {
-		logger.Debug("[CheckSource]: No '/DCIM/xxxCANON/' directory found, disqualified")
+	foundMiscDirAndFile := false
+	if util.DirectoryExists(path.Join(t.sourceDir, "DCIM", "EOSMISC")) {
+		// check for DCIM/EOSMISC/Mxxxx.CTG file
+		logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of DCIM/EOSMISC/Mxxxx.CTG file in volume '%s'", t.sourceDir))
+
+		if exists, _ := util.RequireRegexFileMatch(path.Join(t.sourceDir, "DCIM", "EOSMISC"), `M(\d+).CTG`); exists {
+			foundMiscDirAndFile = true
+		}
+	}
+
+	if util.DirectoryExists(path.Join(t.sourceDir, "DCIM", "CANONMSC")) {
+		// check for DCIM/EOSMISC/Mxxxx.CTG file
+		logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of DCIM/CANONMSC/Mxxxx.CTG file in volume '%s'", t.sourceDir))
+
+		if exists, _ := util.RequireRegexFileMatch(path.Join(t.sourceDir, "DCIM", "CANONMSC"), `M(\d+).CTG`); exists {
+			foundMiscDirAndFile = true
+		}
+	}
+
+	if !foundMiscDirAndFile {
+		logger.Debug("[CheckSource]: No '/DCIM/(EOSMISC|CANONMISC)/Mxxxx.CTG' file found, disqualified")
 		return false
 	}
 
-	// check for DCIM/EOSMISC/Mxxxx.CTG file
-	logger.Debug(fmt.Sprintf("[CheckSource]: Testing for existence of DCIM/EOSMISC/Mxxxx.CTG file in volume '%s'", t.sourceDir))
-	if exists, _ := util.RequireRegexFileMatch(path.Join(t.sourceDir, "DCIM", "EOSMISC"), `M(\d+).CTG`); !exists {
-		logger.Debug("[CheckSource]: No '/DCIM/EOSMISC/Mxxxx.CTG' file found, disqualified")
+	// check for DCIM/(\d+)(CANON|EOS)([A-Za-z0-9]+) directory
+	logger.Debug(fmt.Sprintf(`[CheckSource]: Testing for existence of DCIM/(\d+)(CANON|EOS)([\w\d]{0,}) directory in volume '%s'`, t.sourceDir))
+	if exists, _ := util.RequireRegexDirMatch(path.Join(t.sourceDir, "DCIM"), `(\d+)(CANON|EOS)([\w\d]{0,})`); !exists {
+		logger.Debug(`[CheckSource]: No '(\d+)(CANON|EOS)([\w\d]{0,})/' directory found, disqualified`)
 		return false
 	}
 
@@ -103,47 +119,48 @@ func (t *Processor) CheckSource() bool {
 }
 
 func (t *Processor) EnumerateFiles() []model.SourceFile {
+	et, err := exiftool.NewExiftool()
+	if err != nil {
+		fmt.Printf("Error when intializing: %v\n", err)
+		return nil
+	}
+	t.etHandle = et
+	defer t.etHandle.Close()
+
 	return t.scanDirectory(path.Join(t.sourceDir, "DCIM"), "DCIM")
 }
 
-// private functions
-func (t *Processor) getCameraModel(imagePath string) string {
-	// TODO: Read warning below
-	//!! This type of camera model caching could be an issue if we swapped
-	//!! cards mid-event without first formatting. practically speaking, it
-	//!! shouldn't be a problem since that's not something we've ever done
-	if t.sourceName != "" {
-		return t.sourceName
-	}
-
+func (t *Processor) readExif(imagePath string) *exiftool.FileMetadata {
 	logger.Debug(fmt.Sprintf("Reading EXIF data from '%s'", imagePath))
-	imageFile, err := os.Open(imagePath)
-	if err != nil {
-		logger.Error(fmt.Sprintf("Failed to open image file: %s", err.Error()))
-		return ""
-	}
-	defer imageFile.Close()
+	fileInfos := t.etHandle.ExtractMetadata(imagePath)
 
-	// Optionally register camera makenote data parsing - currently Nikon and
-	// Canon are supported.
-	exif.RegisterParsers(mknote.All...)
-
-	x, err := exif.Decode(imageFile)
-	if err != nil {
-		logger.Error(fmt.Sprintf("Failed to decode exif data in image file: %s", err.Error()))
-		return ""
+	// TODO: error handling
+	if len(fileInfos) == 0 {
+		return nil
 	}
 
-	camModel, _ := x.Get(exif.Model) // normally, don't ignore errors!
-	camModelName, _ := camModel.StringVal()
+	// for k, v := range fileInfos[0].Fields {
+	// 	fmt.Printf("[%v] %v\n", k, v)
+	// }
 
-	t.sourceName = camModelName
+	return &fileInfos[0]
+}
+
+// private functions
+func (t *Processor) getCameraModel(exifData *exiftool.FileMetadata) string {
+	camModelName := fmt.Sprintf("%v", exifData.Fields["Model"])
 	return camModelName
 }
 
-func (t *Processor) getCaptureDate(dtm time.Time) time.Time {
-	format := "2006-01-02 MST"
-	date, err := time.Parse(format, dtm.Format(format))
+func (t *Processor) getCaptureDate(exifData *exiftool.FileMetadata) time.Time {
+	//[DateTimeOriginal] 2024:12:01 11:45:31
+	dtmOriginal := fmt.Sprintf("%v", exifData.Fields["DateTimeOriginal"])[:10]
+
+	zone, _ := time.Now().Zone()
+	dtmStr := fmt.Sprintf("%s %s", dtmOriginal, zone)
+
+	format := "2006:01:02 MST"
+	date, err := time.Parse(format, dtmStr)
 
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to parse date, error: %s", err.Error()))
@@ -189,8 +206,15 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 
 				mediaType := "Photo"
 
-				if strings.HasSuffix(entry.Name(), "MOV") {
+				if strings.HasSuffix(entry.Name(), "MOV") || strings.HasSuffix(entry.Name(), "MP4") {
 					mediaType = "Video"
+				}
+
+				exif := t.readExif(fullPath)
+
+				if exif == nil {
+					logger.Warn(fmt.Sprintf("Could not read EXIF data for '%s', skipping!", fullPath))
+					continue
 				}
 
 				newFile := model.SourceFile{
@@ -198,8 +222,8 @@ func (t *Processor) scanDirectory(absoluteDirPath string, relativeDirPath string
 					SourcePath:   fullPath,
 					MediaType:    mediaType,
 					Size:         stat.Size(),
-					SourceName:   t.getCameraModel(fullPath),
-					CaptureDate:  t.getCaptureDate(stat.ModTime()),
+					SourceName:   t.getCameraModel(exif),
+					CaptureDate:  t.getCaptureDate(exif),
 					FileModTime:  stat.ModTime(),
 					VolumeFormat: t.volumeFormat,
 				}
